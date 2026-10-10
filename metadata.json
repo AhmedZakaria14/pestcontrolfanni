@@ -1,0 +1,6 @@
+{
+  "name": "المركز الفني المتخصص لمكافحة الحشرات",
+  "description": "المركز الفني المتخصص لمكافحة الحشرات والقوارض في مصر. حلول متقدمة وآمنة للمنازل والمنشآت مع فحص دقيق وخطة مكافحة متخصصة.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
