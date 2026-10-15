@@ -517,7 +517,7 @@ const DICTIONARY_AR: Translations = {
   servicesHoursCoverageTitle: 'أوقات العمل والتغطية',
 
   inspectionBarBadge: 'طلب معاينة وتحديد الخطة المناسبة',
-  inspectionBarTitle: 'تواصل مباشرة مع فنيي المكافحة',
+  inspectionBarTitle: 'احجز معاينة عقارك الآن',
   inspectionBarDesc: 'خدمة تغطي القاهرة الكبرى والجيزة ومحافظات مصر مع استجابة سريعة.',
   inspectionBarName: 'الاسم الكريم *',
   inspectionBarPhone: 'رقم الهاتف *',

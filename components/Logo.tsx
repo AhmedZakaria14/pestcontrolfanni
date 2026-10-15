@@ -42,11 +42,11 @@ export default function Logo({
             {locale === 'en' ? 'Technical Specialized Center' : 'المركز الفني المتخصص'}
           </span>
           <span
-            className={`hidden sm:block text-[10px] sm:text-xs font-bold leading-tight ${
+            className={`text-[9px] xs:text-[10px] sm:text-xs font-extrabold leading-tight tracking-wide ${
               isLight ? 'text-[#C7F268]' : 'text-[#059669]'
             }`}
           >
-            {locale === 'en' ? 'Pest & Rodent Control Egypt' : 'لمكافحة الحشرات والقوارض'}
+            {locale === 'en' ? 'Center Pest Control • Egypt' : 'Center Pest Control • لمكافحة الحشرات'}
           </span>
         </div>
       )}
