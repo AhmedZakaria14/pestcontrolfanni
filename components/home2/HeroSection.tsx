@@ -26,6 +26,16 @@ interface HeroSectionProps {
 
 const HERO_IMAGES_AR = [
   {
+    src: COMPANY_IMAGES.mainHeroBg,
+    title: 'الواجهة الرسمية المعتمدة للمركز الفني المتخصص',
+    type: 'المركز الفني المتخصص لمكافحة الحشرات والقوارض',
+  },
+  {
+    src: COMPANY_IMAGES.heroShowcaseImage,
+    title: 'خدمات إبادة وتحصين معتمدة ضد الآفات',
+    type: 'حلول فنية موثقة',
+  },
+  {
     src: COMPANY_IMAGES.fieldWorkerBackpack,
     title: 'الفريق الفني بجهة التطبيق الميداني',
     type: 'صورة رسمية موثقة',
@@ -42,12 +52,22 @@ const HERO_IMAGES_AR = [
   },
   {
     src: COMPANY_IMAGES.fieldTeamAndCertificates,
-    title: 'الفريق الفني واعتمادات الضمان',
+    title: 'الفريق الفني واعتمادات الضمان الإلكتروني',
     type: 'صورة رسمية موثقة',
   },
 ];
 
 const HERO_IMAGES_EN = [
+  {
+    src: COMPANY_IMAGES.mainHeroBg,
+    title: 'Specialized Technical Center Official Interface',
+    type: 'Technical Specialized Pest & Rodent Control',
+  },
+  {
+    src: COMPANY_IMAGES.heroShowcaseImage,
+    title: 'Certified Pest Eradication & Prevention',
+    type: 'Official Technical Solutions',
+  },
   {
     src: COMPANY_IMAGES.fieldWorkerBackpack,
     title: 'Certified Field Application Team',
@@ -95,20 +115,33 @@ export default function HeroSection({ onOpenBooking, onOpenVideo }: HeroSectionP
 
   return (
     <section
-      className={`relative bg-[#033F2D] text-white pt-10 pb-20 md:pt-16 md:pb-28 overflow-hidden ${
+      className={`relative bg-[#033F2D] text-white pt-8 pb-16 sm:pt-12 sm:pb-20 md:pt-16 md:pb-28 overflow-hidden ${
         isRTL ? 'text-right' : 'text-left'
       }`}
     >
+      {/* Full Bleed Main Background Image at Top of Interface */}
+      <div className="absolute inset-0 z-0">
+        <Image
+          src={COMPANY_IMAGES.mainHeroBg}
+          alt="خلفية الواجهة الرئيسية"
+          fill
+          priority
+          className="object-cover object-center opacity-30 sm:opacity-35 transition-opacity duration-1000 scale-105"
+          referrerPolicy="no-referrer"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#033F2D]/92 via-[#033F2D]/88 to-[#033F2D]/98 backdrop-blur-[2px]" />
+      </div>
+
       {/* Decorative corner background elements */}
       <motion.div
         animate={{ scale: [1, 1.15, 1], opacity: [0.1, 0.18, 0.1] }}
         transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
-        className="absolute top-0 left-0 w-[500px] h-[500px] bg-[#C7F268]/15 rounded-full blur-3xl pointer-events-none"
+        className="absolute top-0 left-0 w-[320px] sm:w-[500px] h-[320px] sm:h-[500px] bg-[#C7F268]/15 rounded-full blur-3xl pointer-events-none z-0"
       />
       <motion.div
         animate={{ scale: [1, 1.2, 1], opacity: [0.05, 0.12, 0.05] }}
         transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
-        className="absolute -bottom-20 -right-20 w-[400px] h-[400px] bg-[#C7F268]/10 rounded-full blur-2xl pointer-events-none"
+        className="absolute -bottom-20 -right-20 w-[280px] sm:w-[400px] h-[280px] sm:h-[400px] bg-[#C7F268]/10 rounded-full blur-2xl pointer-events-none z-0"
       />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">

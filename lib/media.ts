@@ -6,6 +6,9 @@ export const COMPANY_IMAGES = {
   precisionGelInjection: 'https://res.cloudinary.com/uo5au5jj/image/upload/v1791594640/WhatsApp_Image_2026-09-23_at_1.16.20_AM.jpg',
   outdoorSpraying: 'https://res.cloudinary.com/uo5au5jj/image/upload/v1791594640/WhatsApp_Image_2026-09-23_at_1.16.21_AM.jpg',
   fieldTeamAndCertificates: 'https://res.cloudinary.com/uo5au5jj/image/upload/v1791594635/WhatsApp_Image_2026-09-23_at_1.19.22_AM.jpg',
+  mainHeroBg: 'https://res.cloudinary.com/agxglxfx/image/upload/v1792081210/63370899-7990-4198-b302-0a8aa353af93.png',
+  heroShowcaseImage: 'https://res.cloudinary.com/agxglxfx/image/upload/v1792081363/ChatGPT_Image_Oct_15_2026_07_21_53_PM.png',
+  fieldCoverageVideo: 'https://res.cloudinary.com/agxglxfx/video/upload/v1792081035/WhatsApp_Video_2026-10-13_at_2.27.49_PM.mp4',
 };
 
 export const CLASSIC_IMAGES = {

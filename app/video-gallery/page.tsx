@@ -8,24 +8,26 @@ import PageBanner from '@/components/PageBanner';
 import VideoModal from '@/components/VideoModal';
 import { Play, Share2, Sparkles, ExternalLink } from 'lucide-react';
 
+import { COMPANY_IMAGES } from '@/lib/media';
+
 const FEATURED_FACEBOOK_VIDEO = {
   id: 'fb-main-reel',
-  title: 'تغطية ميدانية حصرية لعمليات مكافحة وإبادة الآفات في الموقع (Facebook Reel)',
-  description: 'شاهد بالفيديو الحقيقي جانب من تطبيق عمليات الرش والمعالجة الفنية الميدانية التي ينفذها مهندسو المركز بكفاءة وأمان.',
-  duration: 'فيديو ريلز (فيسبوك)',
-  thumbnail: 'https://res.cloudinary.com/uo5au5jj/image/upload/v1791594640/WhatsApp_Image_2026-09-23_at_1.16.21_AM.jpg',
-  videoUrl: 'https://www.facebook.com/share/r/1ESucCbJEJ/',
-  badge: 'فيديو مميز • فيسبوك ريلز',
+  title: 'تغطية ميدانية حصرية لعمليات مكافحة وإبادة الآفات في الموقع',
+  description: 'شاهد بالفيديو الميداني المباشر جانب من تطبيق عمليات الرش والمعالجة الفنية الميدانية التي ينفذها مهندسو المركز بكفاءة وأمان.',
+  duration: 'تغطية فيديو ميدانية',
+  thumbnail: COMPANY_IMAGES.outdoorSpraying,
+  videoUrl: COMPANY_IMAGES.fieldCoverageVideo,
+  badge: 'فيديو حصري • تغطية ميدانية',
 };
 
 const VIDEOS = [
   {
     id: 'fb-reel-1',
     title: 'تغطية تطبيقية ميدانية لرش وتحصين المباني ضد الآفات',
-    duration: 'Facebook Reel',
-    thumbnail: 'https://res.cloudinary.com/uo5au5jj/image/upload/v1791594640/WhatsApp_Image_2026-09-23_at_1.16.21_AM.jpg',
-    videoUrl: 'https://www.facebook.com/share/r/1ESucCbJEJ/',
-    isFacebook: true,
+    duration: 'فيديو ميداني',
+    thumbnail: COMPANY_IMAGES.outdoorSpraying,
+    videoUrl: COMPANY_IMAGES.fieldCoverageVideo,
+    isFacebook: false,
   },
   {
     id: '1',
