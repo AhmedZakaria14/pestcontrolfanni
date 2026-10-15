@@ -98,12 +98,12 @@ export default function LanguageSwitcher({
   // Default 'header' or 'pill'
   return (
     <div
-      className={`relative inline-flex items-center p-0.5 rounded-xl bg-black/25 backdrop-blur-md border border-white/15 select-none ${className}`}
+      className={`relative inline-flex items-center p-0.5 rounded-lg sm:rounded-xl bg-black/30 backdrop-blur-md border border-white/20 select-none ${className}`}
       dir="ltr"
     >
       <button
         onClick={() => setLocale('ar')}
-        className={`flex items-center gap-1.5 px-2.5 py-1 sm:py-1.5 rounded-lg text-xs font-black transition-all cursor-pointer ${
+        className={`flex items-center gap-1 px-2 py-1 sm:px-2.5 sm:py-1 rounded-md sm:rounded-lg text-[10px] sm:text-xs font-black transition-all cursor-pointer ${
           locale === 'ar'
             ? 'bg-[#C7F268] text-[#033F2D] shadow-sm'
             : 'text-white/80 hover:text-white'
@@ -111,12 +111,12 @@ export default function LanguageSwitcher({
         aria-pressed={locale === 'ar'}
         aria-label="التبديل إلى العربية"
       >
-        <span className="text-xs">عربي</span>
+        <span>عربي</span>
       </button>
 
       <button
         onClick={() => setLocale('en')}
-        className={`flex items-center gap-1.5 px-2.5 py-1 sm:py-1.5 rounded-lg text-xs font-black transition-all cursor-pointer ${
+        className={`flex items-center gap-1 px-2 py-1 sm:px-2.5 sm:py-1 rounded-md sm:rounded-lg text-[10px] sm:text-xs font-black transition-all cursor-pointer ${
           locale === 'en'
             ? 'bg-[#C7F268] text-[#033F2D] shadow-sm'
             : 'text-white/80 hover:text-white'
@@ -124,8 +124,8 @@ export default function LanguageSwitcher({
         aria-pressed={locale === 'en'}
         aria-label="Switch to English"
       >
-        <Globe className="w-3 h-3" />
-        <span className="text-xs">EN</span>
+        <Globe className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+        <span>EN</span>
       </button>
     </div>
   );

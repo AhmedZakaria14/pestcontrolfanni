@@ -23,6 +23,7 @@ import VideoModal from '@/components/VideoModal';
 import JsonLd from '@/components/JsonLd';
 import { getLocalBusinessWithServicesSchema } from '@/lib/schema';
 import { useLanguage } from '@/lib/i18n';
+import { COMPANY_IMAGES } from '@/lib/media';
 
 export default function HomePage() {
   const [bookingOpen, setBookingOpen] = useState(false);
@@ -103,7 +104,7 @@ export default function HomePage() {
             ? 'Live Field Video - Technical Specialized Pest Control Center'
             : 'تغطية ميدانية مباشرة - المركز الفني المتخصص لمكافحة الحشرات'
         }
-        videoUrl="https://www.facebook.com/share/r/1ESucCbJEJ/"
+        videoUrl={COMPANY_IMAGES.fieldCoverageVideo}
       />
     </div>
   );
