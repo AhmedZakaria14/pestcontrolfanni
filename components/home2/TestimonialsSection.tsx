@@ -107,7 +107,7 @@ export default function TestimonialsSection() {
                         <User className="w-6 h-6" />
                       </div>
                       <div>
-                        <h4 className="text-base font-bold text-[#033F2D]">{current.name}</h4>
+                        <h3 className="text-base font-bold text-[#033F2D]">{current.name}</h3>
                         <p className="text-xs text-[#484C44]">
                           {current.role} {current.location ? `• ${current.location}` : ''}
                         </p>

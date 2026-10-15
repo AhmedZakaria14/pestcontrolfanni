@@ -130,7 +130,7 @@ export default function AboutSection() {
                     <Check className="w-5 h-5 stroke-[3]" />
                   </div>
                   <div>
-                    <h4 className="font-bold text-[#033F2D] text-sm">{t.aboutCard1Title}</h4>
+                    <h3 className="font-bold text-[#033F2D] text-sm">{t.aboutCard1Title}</h3>
                     <p className="text-xs text-[#484C44] mt-1 leading-relaxed">
                       {t.aboutCard1Desc}
                     </p>
@@ -142,7 +142,7 @@ export default function AboutSection() {
                     <ShieldCheck className="w-5 h-5 stroke-[2.5]" />
                   </div>
                   <div>
-                    <h4 className="font-bold text-[#033F2D] text-sm">{t.aboutCard2Title}</h4>
+                    <h3 className="font-bold text-[#033F2D] text-sm">{t.aboutCard2Title}</h3>
                     <p className="text-xs text-[#484C44] mt-1 leading-relaxed">
                       {t.aboutCard2Desc}
                     </p>
@@ -168,7 +168,7 @@ export default function AboutSection() {
               <a
                 href={company.whatsappUrl}
                 target="_blank"
-                rel="noreferrer"
+                rel="noopener noreferrer nofollow"
                 className="inline-flex items-center gap-2 bg-[#25D366] hover:bg-[#20ba59] text-white font-bold py-3.5 px-6 rounded-xl text-sm transition-colors"
               >
                 <MessageCircle className="w-4 h-4" />

@@ -52,7 +52,7 @@ export default function WhyChooseUs() {
                     <Leaf className="w-6 h-6 stroke-[2]" />
                   </div>
                   <div>
-                    <h4 className="text-base font-bold text-[#033F2D]">{t.whyPillar1Title}</h4>
+                    <h3 className="text-base font-bold text-[#033F2D]">{t.whyPillar1Title}</h3>
                     <p className="text-sm text-[#484C44] mt-1 leading-relaxed">
                       {t.whyPillar1Desc}
                     </p>
@@ -67,7 +67,7 @@ export default function WhyChooseUs() {
                     <Search className="w-6 h-6 stroke-[2]" />
                   </div>
                   <div>
-                    <h4 className="text-base font-bold text-[#033F2D]">{t.whyPillar2Title}</h4>
+                    <h3 className="text-base font-bold text-[#033F2D]">{t.whyPillar2Title}</h3>
                     <p className="text-sm text-[#484C44] mt-1 leading-relaxed">
                       {t.whyPillar2Desc}
                     </p>
@@ -82,7 +82,7 @@ export default function WhyChooseUs() {
                     <ShieldCheck className="w-6 h-6 stroke-[2]" />
                   </div>
                   <div>
-                    <h4 className="text-base font-bold text-[#033F2D]">{t.whyPillar3Title}</h4>
+                    <h3 className="text-base font-bold text-[#033F2D]">{t.whyPillar3Title}</h3>
                     <p className="text-sm text-[#484C44] mt-1 leading-relaxed">
                       {t.whyPillar3Desc}
                     </p>

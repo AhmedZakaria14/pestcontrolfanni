@@ -225,7 +225,7 @@ export default function HeroSection({ onOpenBooking, onOpenVideo }: HeroSectionP
               <a
                 href={company.whatsappUrl}
                 target="_blank"
-                rel="noreferrer"
+                rel="noopener noreferrer nofollow"
                 className="inline-flex items-center gap-2.5 bg-[#25D366] hover:bg-[#20ba59] text-white font-bold py-3.5 px-6 sm:py-4 sm:px-7 rounded-xl text-sm sm:text-base shadow-lg shadow-[#25D366]/20 transition-all hover:scale-[1.02]"
               >
                 <MessageCircle className="w-5 h-5" />

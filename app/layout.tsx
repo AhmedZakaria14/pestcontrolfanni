@@ -17,14 +17,16 @@ const cairo = Cairo({
   display: 'swap',
 });
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://centerpestcontrol.com';
+
 export const metadata: Metadata = {
-  metadataBase: new URL('https://ais-pre-duhcdcf3ixhhk7ogy6voit-87479276453.europe-west2.run.app'),
+  metadataBase: new URL(siteUrl),
   title: {
-    default: 'المركز الفني المتخصص لمكافحة الحشرات والقوارض | Technical Specialized Pest Control Egypt',
-    template: '%s | المركز الفني المتخصص بمصر',
+    default: 'المركز الفني المتخصص | مكافحة الحشرات والقوارض بمصر',
+    template: '%s | المركز الفني المتخصص',
   },
   description:
-    'المركز الفني المتخصص لمكافحة الحشرات والقوارض في مصر. حلول فنية متخصصة للمنازل والفلل والمنشآت بمبيدات آمنة وبدون روائح. Technical Specialized Center for Pest & Rodent Control in Egypt.',
+    'المركز الفني المتخصص لمكافحة الحشرات والقوارض في مصر. خدمات إبادة فنية آمنة بدون روائح للمنازل والشركات بضمان رسمي ومعاينة هندسية.',
   keywords: [
     'المركز الفني المتخصص',
     'مكافحة حشرات مصر',
@@ -40,11 +42,11 @@ export const metadata: Metadata = {
     'Commercial pest management',
   ],
   alternates: {
-    canonical: 'https://ais-pre-duhcdcf3ixhhk7ogy6voit-87479276453.europe-west2.run.app',
+    canonical: siteUrl,
     languages: {
-      'ar-EG': 'https://ais-pre-duhcdcf3ixhhk7ogy6voit-87479276453.europe-west2.run.app?lang=ar',
-      'en': 'https://ais-pre-duhcdcf3ixhhk7ogy6voit-87479276453.europe-west2.run.app?lang=en',
-      'x-default': 'https://ais-pre-duhcdcf3ixhhk7ogy6voit-87479276453.europe-west2.run.app',
+      'ar-EG': `${siteUrl}?lang=ar`,
+      'en': `${siteUrl}?lang=en`,
+      'x-default': siteUrl,
     },
   },
   icons: {
@@ -52,10 +54,12 @@ export const metadata: Metadata = {
     apple: COMPANY_IMAGES.logo,
   },
   openGraph: {
-    title: 'المركز الفني المتخصص لمكافحة الحشرات والقوارض | Technical Specialized Pest Control Egypt',
+    title: 'المركز الفني المتخصص | مكافحة الحشرات والقوارض بمصر',
     description:
-      'حلول متخصصة لمكافحة الحشرات والقوارض في المنازل والفلل والمنشآت داخل مصر. اتصل بنا: 01000989063. Specialized Pest & Rodent Control in Egypt.',
+      'المركز الفني المتخصص لمكافحة الحشرات والقوارض في مصر. خدمات إبادة فنية آمنة بدون روائح للمنازل والشركات بضمان رسمي ومعاينة هندسية.',
     type: 'website',
+    url: siteUrl,
+    siteName: 'المركز الفني المتخصص لمكافحة الحشرات والقوارض',
     locale: 'ar_EG',
     alternateLocale: ['en_US'],
     images: [
@@ -69,9 +73,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'المركز الفني المتخصص لمكافحة الحشرات والقوارض | Technical Specialized Pest Control',
+    title: 'المركز الفني المتخصص | مكافحة الحشرات والقوارض بمصر',
     description:
-      'حلول متخصصة لمكافحة الحشرات والقوارض في المنازل والفلل والمنشآت داخل مصر. اتصل بنا: 01000989063 | +201000989063',
+      'المركز الفني المتخصص لمكافحة الحشرات والقوارض في مصر. خدمات إبادة فنية آمنة بدون روائح للمنازل والشركات بضمان رسمي ومعاينة هندسية.',
     images: [COMPANY_IMAGES.logo],
   },
 };

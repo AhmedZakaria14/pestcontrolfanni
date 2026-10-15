@@ -48,7 +48,7 @@ export default function Footer() {
           <a
             href={company.whatsappUrl}
             target="_blank"
-            rel="noreferrer"
+            rel="noopener noreferrer nofollow"
             className="flex items-center gap-4 p-5 rounded-2xl bg-white/5 border border-white/10 hover:border-[#25D366] transition-all group"
           >
             <div className="w-14 h-14 rounded-xl bg-[#25D366] text-white flex items-center justify-center shrink-0 shadow-lg group-hover:scale-105 transition-transform">
@@ -121,7 +121,7 @@ export default function Footer() {
                 <a
                   href={company.whatsappUrl}
                   target="_blank"
-                  rel="noreferrer"
+                  rel="noopener noreferrer nofollow"
                   className="inline-flex items-center gap-1.5 bg-[#25D366] text-white font-bold px-3 py-2 rounded-lg hover:bg-[#20ba59] transition-colors"
                 >
                   <MessageCircle className="w-4 h-4" />
@@ -140,9 +140,9 @@ export default function Footer() {
 
           {/* Column 2: Quick Links (2.5 cols) */}
           <div className="lg:col-span-2 space-y-4">
-            <h4 className="text-base font-bold text-white border-b-2 border-[#C7F268] inline-block pb-1">
+            <h3 className="text-base font-bold text-white border-b-2 border-[#C7F268] inline-block pb-1">
               {t.footerColQuickLinks}
-            </h4>
+            </h3>
             <ul className="space-y-2.5 text-sm text-white/80">
               <li>
                 <Link href="/" className="hover:text-[#C7F268] transition-colors">
@@ -201,9 +201,9 @@ export default function Footer() {
 
           {/* Column 3: Services (2.5 cols) */}
           <div className="lg:col-span-3 space-y-4">
-            <h4 className="text-base font-bold text-white border-b-2 border-[#C7F268] inline-block pb-1">
+            <h3 className="text-base font-bold text-white border-b-2 border-[#C7F268] inline-block pb-1">
               {t.footerColServices}
-            </h4>
+            </h3>
             <ul className="space-y-2.5 text-sm text-white/80">
               {siteData.services.slice(0, 6).map((srv) => (
                 <li key={srv.id}>
@@ -220,9 +220,9 @@ export default function Footer() {
 
           {/* Column 4: Quick callback / Inquiry (3 cols) */}
           <div className="lg:col-span-3 space-y-4">
-            <h4 className="text-base font-bold text-white border-b-2 border-[#C7F268] inline-block pb-1">
+            <h3 className="text-base font-bold text-white border-b-2 border-[#C7F268] inline-block pb-1">
               {t.footerColInquiry}
-            </h4>
+            </h3>
             <p className="text-sm text-white/80 leading-relaxed">
               {t.footerInquiryDesc}
             </p>

@@ -49,7 +49,7 @@ export default function FeaturesSection() {
                     <Leaf className="w-6 h-6 stroke-[2]" />
                   </div>
                   <div>
-                    <h4 className="text-base font-bold text-[#033F2D]">{t.feature1Title}</h4>
+                    <h3 className="text-base font-bold text-[#033F2D]">{t.feature1Title}</h3>
                     <p className="text-xs text-[#484C44] mt-0.5">{t.feature1Desc}</p>
                   </div>
                 </div>
@@ -61,7 +61,7 @@ export default function FeaturesSection() {
                     <Award className="w-6 h-6 stroke-[2]" />
                   </div>
                   <div>
-                    <h4 className="text-base font-bold text-[#033F2D]">{t.feature2Title}</h4>
+                    <h3 className="text-base font-bold text-[#033F2D]">{t.feature2Title}</h3>
                     <p className="text-xs text-[#484C44] mt-0.5">{t.feature2Desc}</p>
                   </div>
                 </div>
@@ -73,7 +73,7 @@ export default function FeaturesSection() {
                     <Crosshair className="w-6 h-6 stroke-[2]" />
                   </div>
                   <div>
-                    <h4 className="text-base font-bold text-[#033F2D]">{t.feature3Title}</h4>
+                    <h3 className="text-base font-bold text-[#033F2D]">{t.feature3Title}</h3>
                     <p className="text-xs text-[#484C44] mt-0.5">{t.feature3Desc}</p>
                   </div>
                 </div>

@@ -44,7 +44,7 @@ export default function Header() {
               <a
                 href={company.whatsappUrl}
                 target="_blank"
-                rel="noreferrer"
+                rel="noopener noreferrer nofollow"
                 className="hidden sm:flex items-center gap-1.5 hover:text-[#C7F268] text-[#C7F268] font-bold transition-colors text-xs"
                 dir="ltr"
               >
@@ -200,7 +200,7 @@ export default function Header() {
             <a
               href={company.whatsappUrl}
               target="_blank"
-              rel="noreferrer"
+              rel="noopener noreferrer nofollow"
               className="hidden xl:inline-flex items-center gap-1.5 bg-[#25D366] hover:bg-[#20ba59] text-white py-2 px-3.5 rounded-xl text-xs font-bold transition-colors shadow-md"
               title={t.headerWhatsappBtn}
             >

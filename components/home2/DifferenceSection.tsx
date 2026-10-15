@@ -113,7 +113,7 @@ export default function DifferenceSection() {
                     </div>
                     <span className="text-2xl font-black text-[#C7F268]/50">01</span>
                   </div>
-                  <h4 className="text-lg font-bold text-white">{t.diffCard1Title}</h4>
+                  <h3 className="text-lg font-bold text-white">{t.diffCard1Title}</h3>
                   <p className="text-sm text-white/70 leading-relaxed">
                     {t.diffCard1Desc}
                   </p>
@@ -133,7 +133,7 @@ export default function DifferenceSection() {
                     </div>
                     <span className="text-2xl font-black text-[#C7F268]/50">02</span>
                   </div>
-                  <h4 className="text-lg font-bold text-white">{t.diffCard2Title}</h4>
+                  <h3 className="text-lg font-bold text-white">{t.diffCard2Title}</h3>
                   <p className="text-sm text-white/70 leading-relaxed">
                     {t.diffCard2Desc}
                   </p>

@@ -138,7 +138,7 @@ export default function GallerySection({ onOpenVideo }: GallerySectionProps) {
                 <span className="text-xs uppercase font-bold text-[#C7F268] mb-1">
                   {item.category}
                 </span>
-                <h4 className="text-base font-bold leading-snug">{item.title}</h4>
+                <h3 className="text-base font-bold leading-snug">{item.title}</h3>
                 <div
                   className={`absolute top-6 ${
                     isRTL ? 'left-6' : 'right-6'
@@ -189,7 +189,7 @@ export default function GallerySection({ onOpenVideo }: GallerySectionProps) {
                 <span className="text-xs font-bold text-[#C7F268] uppercase">
                   {lightboxItem.category}
                 </span>
-                <h4 className="text-lg font-bold">{lightboxItem.title}</h4>
+                <h3 className="text-lg font-bold">{lightboxItem.title}</h3>
               </div>
             </div>
           </div>

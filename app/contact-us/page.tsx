@@ -64,7 +64,7 @@ export default function ContactUsPage() {
               <a
                 href={company.whatsappUrl}
                 target="_blank"
-                rel="noreferrer"
+                rel="noopener noreferrer nofollow"
                 className={`p-8 rounded-3xl bg-[#F6F8F5] border border-gray-100 flex items-start gap-4 hover:shadow-lg hover:border-[#25D366] transition-all group ${
                   isRTL ? 'text-right' : 'text-left'
                 }`}

@@ -86,7 +86,7 @@ export default function InspectionBarSection() {
                 <a
                   href={company.whatsappUrl}
                   target="_blank"
-                  rel="noreferrer"
+                  rel="noopener noreferrer nofollow"
                   className="inline-flex items-center gap-2 p-2.5 px-3.5 rounded-xl bg-[#25D366] text-white hover:bg-[#20ba59] transition-colors text-xs font-bold"
                 >
                   <MessageCircle className="w-4 h-4" />
@@ -100,7 +100,7 @@ export default function InspectionBarSection() {
               {success ? (
                 <div className="p-6 rounded-xl bg-[#033F2D] text-white text-center space-y-2">
                   <CheckCircle2 className="w-10 h-10 text-[#C7F268] mx-auto" />
-                  <h4 className="text-lg font-bold text-white">{t.inspBarSuccess}</h4>
+                  <h3 className="text-lg font-bold text-white">{t.inspBarSuccess}</h3>
                   <p className="text-xs text-white/80 max-w-md mx-auto">
                     {t.bookingSuccessDesc(formData.name, formData.phone)}
                   </p>

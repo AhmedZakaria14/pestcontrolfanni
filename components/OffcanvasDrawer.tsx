@@ -221,7 +221,7 @@ export default function OffcanvasDrawer({
               <a
                 href={company.whatsappUrl}
                 target="_blank"
-                rel="noreferrer"
+                rel="noopener noreferrer nofollow"
                 dir="ltr"
                 className="hover:text-[#25D366] font-bold text-[#25D366]"
               >
@@ -244,7 +244,7 @@ export default function OffcanvasDrawer({
           <a
             href={company.whatsappUrl}
             target="_blank"
-            rel="noreferrer"
+            rel="noopener noreferrer nofollow"
             className="w-full bg-[#25D366] hover:bg-[#20ba59] text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-colors text-sm"
           >
             <MessageCircle className="w-4 h-4" />
