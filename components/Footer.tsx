@@ -2,20 +2,26 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Phone, Clock, ArrowLeft, CheckCircle2, MessageCircle, MapPin } from 'lucide-react';
-import { SITE_INFO, SERVICES_DATA } from '@/lib/siteData';
-import { company } from '@/lib/company';
+import { Phone, ArrowLeft, ArrowRight, CheckCircle2, MessageCircle, MapPin } from 'lucide-react';
 import Logo from '@/components/Logo';
+import { useLanguage } from '@/lib/i18n';
 
 export default function Footer() {
   const [inquiryPhone, setInquiryPhone] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const { t, company, siteData, isRTL, locale } = useLanguage();
 
   const handleInquiry = (e: React.FormEvent) => {
     e.preventDefault();
     if (!inquiryPhone) return;
-    // Redirect to WhatsApp with pre-filled message
-    const msg = encodeURIComponent(`مرحباً، أود الاستفسار عن خدمة مكافحة الحشرات. رقم هاتفي للمتابعة: ${inquiryPhone}`);
+    const msg =
+      locale === 'en'
+        ? encodeURIComponent(
+            `Hello, I would like to inquire about pest control services. My contact phone number is: ${inquiryPhone}`
+          )
+        : encodeURIComponent(
+            `مرحباً، أود الاستفسار عن خدمة مكافحة الحشرات. رقم هاتفي للمتابعة: ${inquiryPhone}`
+          );
     window.open(`${company.whatsappUrl}?text=${msg}`, '_blank');
     setSubmitted(true);
     setTimeout(() => {
@@ -25,7 +31,12 @@ export default function Footer() {
   };
 
   return (
-    <footer className="bg-[#022A1E] text-white pt-16 pb-8 border-t border-white/10 relative overflow-hidden text-right">
+    <footer
+      className={`bg-[#022A1E] text-white pt-16 pb-8 border-t border-white/10 relative overflow-hidden ${
+        isRTL ? 'text-right' : 'text-left'
+      }`}
+      dir={isRTL ? 'rtl' : 'ltr'}
+    >
       {/* Decorative background shapes */}
       <div className="absolute top-0 right-0 w-96 h-96 bg-[#C7F268]/5 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-0 left-0 w-96 h-96 bg-[#C7F268]/5 rounded-full blur-3xl pointer-events-none" />
@@ -44,8 +55,13 @@ export default function Footer() {
               <MessageCircle className="w-7 h-7 stroke-[2.5]" />
             </div>
             <div>
-              <span className="text-xs uppercase tracking-wider text-[#C7F268] font-bold">تواصل واتساب مباشر:</span>
-              <span className="block text-lg font-black text-white group-hover:text-[#25D366] transition-colors mt-0.5" dir="ltr">
+              <span className="text-xs uppercase tracking-wider text-[#C7F268] font-bold">
+                {t.footerWhatsappCardTitle}:
+              </span>
+              <span
+                className="block text-lg font-black text-white group-hover:text-[#25D366] transition-colors mt-0.5"
+                dir="ltr"
+              >
                 {company.whatsapp}
               </span>
             </div>
@@ -60,12 +76,17 @@ export default function Footer() {
               <Phone className="w-7 h-7 stroke-[2.5]" />
             </div>
             <div>
-              <span className="text-xs uppercase tracking-wider text-[#C7F268] font-bold">اتصال هاتفي مباشر:</span>
-              <span className="block text-lg font-black text-white group-hover:text-[#C7F268] transition-colors mt-0.5" dir="ltr">
+              <span className="text-xs uppercase tracking-wider text-[#C7F268] font-bold">
+                {t.footerPhoneCardTitle}:
+              </span>
+              <span
+                className="block text-lg font-black text-white group-hover:text-[#C7F268] transition-colors mt-0.5"
+                dir="ltr"
+              >
                 {company.phonePrimary}
               </span>
               <span className="block text-xs text-white/70 mt-0.5" dir="ltr">
-                أو: {company.phoneSecondary}
+                {locale === 'en' ? 'Or:' : 'أو:'} {company.phoneSecondary}
               </span>
             </div>
           </a>
@@ -76,8 +97,10 @@ export default function Footer() {
               <MapPin className="w-7 h-7 stroke-[2.5]" />
             </div>
             <div>
-              <span className="text-xs uppercase tracking-wider text-[#C7F268] font-bold">نطاق التغطية والمواعيد:</span>
-              <p className="text-sm font-bold text-white mt-0.5">القاهرة الكبرى والجيزة ومحافظات مصر</p>
+              <span className="text-xs uppercase tracking-wider text-[#C7F268] font-bold">
+                {t.footerCoverageCardTitle}:
+              </span>
+              <p className="text-sm font-bold text-white mt-0.5">{company.coverage}</p>
               <p className="text-xs text-white/70 mt-0.5">{company.workingHours}</p>
             </div>
           </div>
@@ -102,14 +125,14 @@ export default function Footer() {
                   className="inline-flex items-center gap-1.5 bg-[#25D366] text-white font-bold px-3 py-2 rounded-lg hover:bg-[#20ba59] transition-colors"
                 >
                   <MessageCircle className="w-4 h-4" />
-                  <span>محادثة واتساب سريعة</span>
+                  <span>{t.footerQuickWhatsapp}</span>
                 </a>
                 <a
                   href={company.phonePrimaryRaw}
                   className="inline-flex items-center gap-1.5 bg-white/10 text-white font-bold px-3 py-2 rounded-lg hover:bg-white/20 transition-colors"
                 >
                   <Phone className="w-4 h-4 text-[#C7F268]" />
-                  <span>اتصل الآن</span>
+                  <span>{t.callDirect}</span>
                 </a>
               </div>
             </div>
@@ -118,49 +141,59 @@ export default function Footer() {
           {/* Column 2: Quick Links (2.5 cols) */}
           <div className="lg:col-span-2 space-y-4">
             <h4 className="text-base font-bold text-white border-b-2 border-[#C7F268] inline-block pb-1">
-              روابط سريعة
+              {t.footerColQuickLinks}
             </h4>
             <ul className="space-y-2.5 text-sm text-white/80">
               <li>
                 <Link href="/" className="hover:text-[#C7F268] transition-colors">
-                  الرئيسية
+                  {t.navHome}
                 </Link>
               </li>
               <li>
                 <Link href="/about-us" className="hover:text-[#C7F268] transition-colors">
-                  عن المركز
+                  {t.navAbout}
                 </Link>
               </li>
               <li>
                 <Link href="/services" className="hover:text-[#C7F268] transition-colors">
-                  خدمات المكافحة
+                  {t.navServices}
                 </Link>
               </li>
               <li>
-                <Link href="/pest-identifier" className="text-[#C7F268] font-bold hover:underline transition-colors flex items-center gap-1.5">
-                  <span>أداة تشخيص الحشرات</span>
-                  <span className="text-[10px] px-1.5 py-0.2 bg-[#C7F268] text-[#033F2D] rounded-full font-black">جديد</span>
+                <Link
+                  href="/pest-identifier"
+                  className="text-[#C7F268] font-bold hover:underline transition-colors flex items-center gap-1.5"
+                >
+                  <span>{t.navPestIdentifier}</span>
+                  <span className="text-[10px] px-1.5 py-0.2 bg-[#C7F268] text-[#033F2D] rounded-full font-black">
+                    {t.navPestIdentifierBadge}
+                  </span>
                 </Link>
               </li>
               <li>
-                <Link href="/warranty-verification" className="text-[#C7F268] font-bold hover:underline transition-colors flex items-center gap-1.5">
-                  <span>التحقق من الضمان الإلكتروني</span>
-                  <span className="text-[10px] px-1.5 py-0.2 bg-[#C7F268] text-[#033F2D] rounded-full font-black">معتمد</span>
+                <Link
+                  href="/warranty-verify"
+                  className="text-[#C7F268] font-bold hover:underline transition-colors flex items-center gap-1.5"
+                >
+                  <span>{t.navWarranty}</span>
+                  <span className="text-[10px] px-1.5 py-0.2 bg-[#C7F268] text-[#033F2D] rounded-full font-black">
+                    {t.navWarrantyBadge}
+                  </span>
                 </Link>
               </li>
               <li>
                 <Link href="/projects" className="hover:text-[#C7F268] transition-colors">
-                  أعمال ميدانية
+                  {t.navProjects}
                 </Link>
               </li>
               <li>
                 <Link href="/faqs" className="hover:text-[#C7F268] transition-colors">
-                  الأسئلة الشائعة
+                  {t.navFaqs}
                 </Link>
               </li>
               <li>
                 <Link href="/contact-us" className="hover:text-[#C7F268] transition-colors">
-                  تواصل معنا
+                  {t.navContact}
                 </Link>
               </li>
             </ul>
@@ -169,10 +202,10 @@ export default function Footer() {
           {/* Column 3: Services (2.5 cols) */}
           <div className="lg:col-span-3 space-y-4">
             <h4 className="text-base font-bold text-white border-b-2 border-[#C7F268] inline-block pb-1">
-              خدمات المكافحة
+              {t.footerColServices}
             </h4>
             <ul className="space-y-2.5 text-sm text-white/80">
-              {SERVICES_DATA.slice(0, 6).map((srv) => (
+              {siteData.services.slice(0, 6).map((srv) => (
                 <li key={srv.id}>
                   <Link
                     href={`/services/${srv.slug}`}
@@ -188,10 +221,10 @@ export default function Footer() {
           {/* Column 4: Quick callback / Inquiry (3 cols) */}
           <div className="lg:col-span-3 space-y-4">
             <h4 className="text-base font-bold text-white border-b-2 border-[#C7F268] inline-block pb-1">
-              طلب اتصال سريع
+              {t.footerColInquiry}
             </h4>
             <p className="text-sm text-white/80 leading-relaxed">
-              اترك رقم هاتفك وسيقوم فني متخصص بالتواصل معك فوراً لتحديد نوع الحشرة وخطة المكافحة المناسبة.
+              {t.footerInquiryDesc}
             </p>
 
             <form onSubmit={handleInquiry} className="space-y-3">
@@ -200,24 +233,26 @@ export default function Footer() {
                   type="tel"
                   value={inquiryPhone}
                   onChange={(e) => setInquiryPhone(e.target.value)}
-                  placeholder="أدخل رقم هاتفك (مثال: 010...)"
+                  placeholder={t.footerInquiryPlaceholder}
                   dir="ltr"
                   required
-                  className="w-full bg-white/10 text-white placeholder-white/50 text-sm px-4 py-3 rounded-xl border border-white/20 focus:outline-none focus:border-[#C7F268] transition-colors text-right"
+                  className={`w-full bg-white/10 text-white placeholder-white/50 text-sm px-4 py-3 rounded-xl border border-white/20 focus:outline-none focus:border-[#C7F268] transition-colors ${
+                    isRTL ? 'text-right' : 'text-left'
+                  }`}
                 />
               </div>
               <button
                 type="submit"
-                className="w-full btn-default py-3 text-sm flex items-center justify-center gap-2 font-bold"
+                className="w-full bg-[#C7F268] hover:bg-[#b5e050] text-[#033F2D] rounded-xl py-3 text-sm flex items-center justify-center gap-2 font-bold cursor-pointer transition-all shadow-md"
               >
-                <span>طلب اتصال ومعاينة</span>
-                <ArrowLeft className="w-4 h-4 mr-1" />
+                <span>{t.footerInquirySubmit}</span>
+                {isRTL ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
               </button>
 
               {submitted && (
                 <div className="flex items-center gap-2 text-[#C7F268] text-xs font-bold pt-1 animate-in fade-in">
                   <CheckCircle2 className="w-4 h-4 shrink-0" />
-                  <span>تم تحويل طلبك، نتواصل معك في أقرب وقت.</span>
+                  <span>{t.footerInquirySuccess}</span>
                 </div>
               )}
             </form>
@@ -226,16 +261,16 @@ export default function Footer() {
 
         {/* Bottom Bar: Copyright & Policy */}
         <div className="pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-white/60">
-          <p>© {new Date().getFullYear()} {company.name}. جميع الحقوق محفوظة لخدمات مكافحة الحشرات في مصر.</p>
+          <p>© {new Date().getFullYear()} {company.name}. {t.footerCopyright}.</p>
           <div className="flex items-center gap-6">
             <Link href="/privacy-policy" className="hover:text-[#C7F268] transition-colors">
-              سياسة الخصوصية
+              {t.footerPrivacy}
             </Link>
             <Link href="/terms-conditions" className="hover:text-[#C7F268] transition-colors">
-              الشروط والأحكام
+              {t.footerTerms}
             </Link>
             <Link href="/faqs" className="hover:text-[#C7F268] transition-colors">
-              الأسئلة الشائعة
+              {t.navFaqs}
             </Link>
           </div>
         </div>

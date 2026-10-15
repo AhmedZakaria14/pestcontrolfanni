@@ -7,13 +7,15 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import PageBanner from '@/components/PageBanner';
 import BookingModal from '@/components/BookingModal';
-import { PROJECTS_DATA } from '@/lib/siteData';
 import {
   CheckCircle2,
   AlertCircle,
   ShieldCheck,
   PhoneCall,
+  ArrowLeft,
+  ArrowRight,
 } from 'lucide-react';
+import { useLanguage } from '@/lib/i18n';
 
 export default function ProjectDetailPage({
   params,
@@ -22,23 +24,29 @@ export default function ProjectDetailPage({
 }) {
   const resolvedParams = use(params);
   const [bookingOpen, setBookingOpen] = useState(false);
+  const { t, siteData, isRTL, locale, dir } = useLanguage();
 
   const project =
-    PROJECTS_DATA.find((p) => p.slug === resolvedParams.slug) || PROJECTS_DATA[0];
+    siteData.projects.find((p) => p.slug === resolvedParams.slug) || siteData.projects[0];
 
   if (!project) {
     notFound();
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-white text-right">
+    <div
+      className={`min-h-screen flex flex-col bg-white ${
+        isRTL ? 'text-right' : 'text-left'
+      }`}
+      dir={dir}
+    >
       <Header />
 
       <main className="flex-1">
         <PageBanner
           title={project.title}
           breadcrumbs={[
-            { label: 'المشاريع', href: '/projects' },
+            { label: t.navProjects, href: '/projects' },
             { label: project.title },
           ]}
         />
@@ -58,14 +66,22 @@ export default function ProjectDetailPage({
                     className="object-cover"
                     referrerPolicy="no-referrer"
                   />
-                  <div className="absolute top-6 right-6 bg-[#033F2D] text-[#C7F268] text-xs font-bold uppercase tracking-wider px-4 py-1.5 rounded-full shadow-lg">
-                    إبادة وتحصين {project.category}
+                  <div
+                    className={`absolute top-6 ${
+                      isRTL ? 'right-6' : 'left-6'
+                    } bg-[#033F2D] text-[#C7F268] text-xs font-bold uppercase tracking-wider px-4 py-1.5 rounded-full shadow-lg`}
+                  >
+                    {locale === 'en'
+                      ? `Extermination: ${project.category}`
+                      : `إبادة وتحصين ${project.category}`}
                   </div>
                 </div>
 
                 {/* Overview */}
                 <div className="space-y-4">
-                  <h2 className="text-3xl font-black text-[#033F2D]">نظرة عامة على المشروع</h2>
+                  <h2 className="text-3xl font-black text-[#033F2D]">
+                    {locale === 'en' ? 'Project Overview' : 'نظرة عامة على المشروع'}
+                  </h2>
                   <p className="text-base text-[#484C44] leading-relaxed">{project.overview}</p>
                 </div>
 
@@ -73,7 +89,9 @@ export default function ProjectDetailPage({
                 <div className="p-6 sm:p-8 rounded-3xl bg-[#F6F8F5] border border-gray-100 space-y-3">
                   <div className="flex items-center gap-2 text-[#033F2D]">
                     <AlertCircle className="w-5 h-5 text-amber-600 shrink-0" />
-                    <h3 className="text-xl font-bold">التحدي الميداني</h3>
+                    <h3 className="text-xl font-bold">
+                      {locale === 'en' ? 'Field Challenge' : 'التحدي الميداني'}
+                    </h3>
                   </div>
                   <p className="text-sm text-[#484C44] leading-relaxed">{project.challenge}</p>
                 </div>
@@ -82,14 +100,18 @@ export default function ProjectDetailPage({
                 <div className="p-6 sm:p-8 rounded-3xl bg-[#033F2D] text-white space-y-3 shadow-xl">
                   <div className="flex items-center gap-2 text-[#C7F268]">
                     <ShieldCheck className="w-5 h-5 shrink-0" />
-                    <h3 className="text-xl font-bold text-white">حلنا الاستراتيجي المنفذ</h3>
+                    <h3 className="text-xl font-bold text-white">
+                      {locale === 'en' ? 'Our Strategic Solution' : 'حلنا الاستراتيجي المنفذ'}
+                    </h3>
                   </div>
                   <p className="text-sm text-white/85 leading-relaxed">{project.solution}</p>
                 </div>
 
                 {/* Measurable Results */}
                 <div className="space-y-4">
-                  <h3 className="text-2xl font-bold text-[#033F2D]">النتائج الرئيسية المحققة</h3>
+                  <h3 className="text-2xl font-bold text-[#033F2D]">
+                    {locale === 'en' ? 'Key Measurable Results' : 'النتائج الرئيسية المحققة'}
+                  </h3>
                   <div className="space-y-3">
                     {project.results.map((res, i) => (
                       <div
@@ -109,33 +131,35 @@ export default function ProjectDetailPage({
                 {/* Project Metadata Card */}
                 <div className="p-6 rounded-3xl bg-[#F6F8F5] border border-gray-100 space-y-4">
                   <h4 className="text-lg font-bold text-[#033F2D] border-b border-gray-200 pb-3">
-                    ملخص دراسة الحالة
+                    {locale === 'en' ? 'Case Study Summary' : 'ملخص دراسة الحالة'}
                   </h4>
                   <div className="space-y-3 text-sm">
                     <div>
                       <span className="text-xs uppercase text-gray-400 font-bold block">
-                        التصنيف
+                        {locale === 'en' ? 'Category' : 'التصنيف'}
                       </span>
                       <span className="font-bold text-[#033F2D]">{project.category}</span>
                     </div>
                     <div>
                       <span className="text-xs uppercase text-gray-400 font-bold block">
-                        الموقع
+                        {locale === 'en' ? 'Location' : 'الموقع'}
                       </span>
                       <span className="font-bold text-[#033F2D]">{project.location}</span>
                     </div>
                     <div>
                       <span className="text-xs uppercase text-gray-400 font-bold block">
-                        مدة التنفيذ
+                        {locale === 'en' ? 'Execution Time' : 'مدة التنفيذ'}
                       </span>
                       <span className="font-bold text-[#033F2D]">{project.duration}</span>
                     </div>
                     <div>
                       <span className="text-xs uppercase text-gray-400 font-bold block">
-                        حالة المشروع
+                        {locale === 'en' ? 'Status' : 'حالة المشروع'}
                       </span>
                       <span className="inline-block px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#C7F268] text-[#033F2D]">
-                        تم الحل والتطهير 100% مع الضمان
+                        {locale === 'en'
+                          ? '100% Eradicated & Guaranteed'
+                          : 'تم الحل والتطهير 100% مع الضمان'}
                       </span>
                     </div>
                   </div>
@@ -146,15 +170,22 @@ export default function ProjectDetailPage({
                   <div className="w-14 h-14 rounded-2xl bg-[#C7F268] text-[#033F2D] flex items-center justify-center mx-auto">
                     <PhoneCall className="w-6 h-6" />
                   </div>
-                  <h4 className="text-xl font-bold text-white">هل تواجه مشكلة آفات مماثلة؟</h4>
+                  <h4 className="text-xl font-bold text-white">
+                    {locale === 'en'
+                      ? 'Facing a similar pest issue?'
+                      : 'هل تواجه مشكلة آفات مماثلة؟'}
+                  </h4>
                   <p className="text-xs text-white/80 leading-relaxed">
-                    فريقنا الخبير جاهز لمعاينة موقعك ووضع استراتيجية إبادة وحماية مضمونة.
+                    {locale === 'en'
+                      ? 'Our team is ready to inspect your site and implement a guaranteed eradication strategy.'
+                      : 'فريقنا الخبير جاهز لمعاينة موقعك ووضع استراتيجية إبادة وحماية مضمونة.'}
                   </p>
                   <button
                     onClick={() => setBookingOpen(true)}
-                    className="w-full btn-default py-3 text-center justify-center font-bold text-sm cursor-pointer"
+                    className="w-full bg-[#C7F268] hover:bg-[#b5e050] text-[#033F2D] py-3 rounded-xl font-bold text-sm cursor-pointer inline-flex items-center justify-center gap-2"
                   >
-                    حجز موعد فحص فوري
+                    <span>{t.requestInspectionBtn}</span>
+                    {isRTL ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
                   </button>
                 </div>
               </div>

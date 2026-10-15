@@ -7,8 +7,8 @@ import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import PageBanner from '@/components/PageBanner';
-import { BLOG_POSTS, SERVICES_DATA } from '@/lib/siteData';
-import { Calendar, User, Clock, Tag, CheckCircle2, ChevronLeft } from 'lucide-react';
+import { Calendar, User, Clock, Tag, CheckCircle2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useLanguage } from '@/lib/i18n';
 
 export default function BlogPostDetailPage({
   params,
@@ -17,9 +17,10 @@ export default function BlogPostDetailPage({
 }) {
   const resolvedParams = use(params);
   const [commentSent, setCommentSent] = useState(false);
+  const { t, siteData, isRTL, locale, dir } = useLanguage();
 
   const post =
-    BLOG_POSTS.find((p) => p.slug === resolvedParams.slug) || BLOG_POSTS[0];
+    siteData.blogPosts.find((p) => p.slug === resolvedParams.slug) || siteData.blogPosts[0];
 
   if (!post) {
     notFound();
@@ -32,14 +33,19 @@ export default function BlogPostDetailPage({
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-white text-right">
+    <div
+      className={`min-h-screen flex flex-col bg-white ${
+        isRTL ? 'text-right' : 'text-left'
+      }`}
+      dir={dir}
+    >
       <Header />
 
       <main className="flex-1">
         <PageBanner
           title={post.title}
           breadcrumbs={[
-            { label: 'المدونة', href: '/blog' },
+            { label: t.navBlog, href: '/blog' },
             { label: post.title },
           ]}
         />
@@ -59,7 +65,11 @@ export default function BlogPostDetailPage({
                     className="object-cover"
                     referrerPolicy="no-referrer"
                   />
-                  <div className="absolute top-6 right-6 bg-[#033F2D] text-[#C7F268] text-xs font-bold uppercase tracking-wider px-4 py-1.5 rounded-full shadow-lg">
+                  <div
+                    className={`absolute top-6 ${
+                      isRTL ? 'right-6' : 'left-6'
+                    } bg-[#033F2D] text-[#C7F268] text-xs font-bold uppercase tracking-wider px-4 py-1.5 rounded-full shadow-lg`}
+                  >
                     {post.category}
                   </div>
                 </div>
@@ -72,7 +82,9 @@ export default function BlogPostDetailPage({
                   </div>
                   <div className="flex items-center gap-1.5">
                     <User className="w-4 h-4 text-[#033F2D]" />
-                    <span>بواسطة {post.author}</span>
+                    <span>
+                      {locale === 'en' ? `By ${post.author}` : `بواسطة ${post.author}`}
+                    </span>
                   </div>
                   <div className="flex items-center gap-1.5">
                     <Clock className="w-4 h-4 text-[#033F2D]" />
@@ -101,7 +113,12 @@ export default function BlogPostDetailPage({
                       if (paragraph.startsWith('- ')) {
                         const items = paragraph.split('\n');
                         return (
-                          <ul key={idx} className="space-y-2 pr-4 list-disc text-sm">
+                          <ul
+                            key={idx}
+                            className={`space-y-2 ${
+                              isRTL ? 'pr-4' : 'pl-4'
+                            } list-disc text-sm`}
+                          >
                             {items.map((item, i) => (
                               <li key={i}>{item.replace('- ', '')}</li>
                             ))}
@@ -115,8 +132,8 @@ export default function BlogPostDetailPage({
 
                 {/* Tags */}
                 <div className="pt-6 border-t border-gray-100 flex flex-wrap items-center gap-2">
-                  <span className="text-xs font-bold text-[#033F2D] uppercase ml-2 flex items-center gap-1">
-                    <Tag className="w-3.5 h-3.5" /> الوسوم:
+                  <span className="text-xs font-bold text-[#033F2D] uppercase flex items-center gap-1">
+                    <Tag className="w-3.5 h-3.5" /> {locale === 'en' ? 'Tags:' : 'الوسوم:'}
                   </span>
                   {post.tags.map((tag, idx) => (
                     <span
@@ -129,16 +146,28 @@ export default function BlogPostDetailPage({
                 </div>
 
                 {/* Comment Form */}
-                <div className="mt-12 p-8 rounded-3xl bg-[#F6F8F5] border border-gray-100 space-y-6 text-right">
-                  <h3 className="text-2xl font-bold text-[#033F2D]">اترك تعليقاً أو استفساراً</h3>
+                <div
+                  className={`mt-12 p-8 rounded-3xl bg-[#F6F8F5] border border-gray-100 space-y-6 ${
+                    isRTL ? 'text-right' : 'text-left'
+                  }`}
+                >
+                  <h3 className="text-2xl font-bold text-[#033F2D]">
+                    {locale === 'en' ? 'Leave a Comment or Inquiry' : 'اترك تعليقاً أو استفساراً'}
+                  </h3>
                   <p className="text-xs text-gray-500">
-                    لن يتم نشر بريدك الإلكتروني للعامة. الحقول الإلزامية محددة بـ *
+                    {locale === 'en'
+                      ? 'Your email will not be published. Required fields are marked with *'
+                      : 'لن يتم نشر بريدك الإلكتروني للعامة. الحقول الإلزامية محددة بـ *'}
                   </p>
 
                   {commentSent ? (
                     <div className="p-4 rounded-xl bg-[#033F2D] text-white flex items-center gap-2 text-sm font-semibold">
                       <CheckCircle2 className="w-5 h-5 text-[#C7F268]" />
-                      <span>شكراً لك! تم استلام تعليقك وبانتظار المراجعة.</span>
+                      <span>
+                        {locale === 'en'
+                          ? 'Thank you! Your comment has been received.'
+                          : 'شكراً لك! تم استلام تعليقك وبانتظار المراجعة.'}
+                      </span>
                     </div>
                   ) : (
                     <form onSubmit={handleComment} className="space-y-4">
@@ -146,13 +175,15 @@ export default function BlogPostDetailPage({
                         <input
                           type="text"
                           required
-                          placeholder="الاسم الكريم *"
-                          className="px-4 py-3 rounded-xl border border-gray-200 text-sm bg-white outline-none focus:border-[#033F2D] text-right"
+                          placeholder={locale === 'en' ? 'Full Name *' : 'الاسم الكريم *'}
+                          className={`px-4 py-3 rounded-xl border border-gray-200 text-sm bg-white outline-none focus:border-[#033F2D] ${
+                            isRTL ? 'text-right' : 'text-left'
+                          }`}
                         />
                         <input
                           type="email"
                           required
-                          placeholder="البريد الإلكتروني *"
+                          placeholder={locale === 'en' ? 'Email Address *' : 'البريد الإلكتروني *'}
                           className="px-4 py-3 rounded-xl border border-gray-200 text-sm bg-white outline-none focus:border-[#033F2D] text-left"
                           dir="ltr"
                         />
@@ -160,11 +191,16 @@ export default function BlogPostDetailPage({
                       <textarea
                         rows={4}
                         required
-                        placeholder="اكتب تعليقك أو سؤالك هنا... *"
-                        className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm bg-white outline-none focus:border-[#033F2D] resize-none text-right"
+                        placeholder={locale === 'en' ? 'Write your comment or question here... *' : 'اكتب تعليقك أو سؤالك هنا... *'}
+                        className={`w-full px-4 py-3 rounded-xl border border-gray-200 text-sm bg-white outline-none focus:border-[#033F2D] resize-none ${
+                          isRTL ? 'text-right' : 'text-left'
+                        }`}
                       />
-                      <button type="submit" className="btn-default py-3 px-6 text-sm font-bold cursor-pointer">
-                        إرسال التعليق
+                      <button
+                        type="submit"
+                        className="bg-[#033F2D] hover:bg-[#022A1E] text-white py-3 px-6 text-sm font-bold rounded-xl cursor-pointer transition-colors"
+                      >
+                        {locale === 'en' ? 'Submit Comment' : 'إرسال التعليق'}
                       </button>
                     </form>
                   )}
@@ -176,10 +212,10 @@ export default function BlogPostDetailPage({
                 {/* Recent Posts */}
                 <div className="p-6 rounded-3xl bg-[#F6F8F5] border border-gray-100 space-y-4">
                   <h4 className="text-lg font-bold text-[#033F2D] border-b border-gray-200 pb-3">
-                    أحدث المقالات
+                    {locale === 'en' ? 'Recent Articles' : 'أحدث المقالات'}
                   </h4>
                   <div className="space-y-4">
-                    {BLOG_POSTS.map((bp) => (
+                    {siteData.blogPosts.map((bp) => (
                       <Link
                         key={bp.id}
                         href={`/blog/${bp.slug}`}
@@ -208,17 +244,21 @@ export default function BlogPostDetailPage({
                 {/* Categories */}
                 <div className="p-6 rounded-3xl bg-[#F6F8F5] border border-gray-100 space-y-4">
                   <h4 className="text-lg font-bold text-[#033F2D] border-b border-gray-200 pb-3">
-                    أقسام الخدمات
+                    {t.navServices}
                   </h4>
                   <ul className="space-y-2">
-                    {SERVICES_DATA.map((s) => (
+                    {siteData.services.map((s) => (
                       <li key={s.id}>
                         <Link
                           href={`/services/${s.slug}`}
                           className="flex items-center justify-between p-2 rounded-lg text-sm text-[#033F2D] hover:bg-white transition-colors font-bold"
                         >
                           <span>{s.title}</span>
-                          <ChevronLeft className="w-3.5 h-3.5 text-gray-400" />
+                          {isRTL ? (
+                            <ChevronLeft className="w-3.5 h-3.5 text-gray-400" />
+                          ) : (
+                            <ChevronRight className="w-3.5 h-3.5 text-gray-400" />
+                          )}
                         </Link>
                       </li>
                     ))}

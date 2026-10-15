@@ -34,25 +34,19 @@ import {
   Phone,
   Calendar,
   ShieldCheck,
-  HelpCircle,
   Search,
   UploadCloud,
   FileCheck,
-  ChevronLeft,
-  Info,
   Bug,
 } from 'lucide-react';
 import {
-  PEST_DATABASE,
-  QUIZ_QUESTIONS,
   QuizAnswers,
-  matchPests,
+  diagnosePest,
   MatchResult,
   PestInfo,
 } from '@/lib/pestData';
-import { SITE_INFO } from '@/lib/siteData';
-import { company } from '@/lib/company';
 import BookingModal from './BookingModal';
+import { useLanguage } from '@/lib/i18n';
 
 const iconMap: Record<string, any> = {
   UtensilsCrossed,
@@ -80,6 +74,7 @@ const iconMap: Record<string, any> = {
 };
 
 export default function PestIdentifierTool() {
+  const { t, company, pestData, isRTL, locale } = useLanguage();
   const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState<QuizAnswers>({});
   const [results, setResults] = useState<MatchResult[] | null>(null);
@@ -93,8 +88,11 @@ export default function PestIdentifierTool() {
   const [userPhone, setUserPhone] = useState('');
   const [userName, setUserName] = useState('');
 
-  const totalQuestions = QUIZ_QUESTIONS.length;
-  const currentQuestion = QUIZ_QUESTIONS[currentStep];
+  const questions = pestData.questions;
+  const pestDatabase = pestData.database;
+
+  const totalQuestions = questions.length;
+  const currentQuestion = questions[currentStep];
 
   const handleSelectOption = (questionId: string, value: string) => {
     const updatedAnswers = { ...answers, [questionId]: value };
@@ -103,8 +101,8 @@ export default function PestIdentifierTool() {
     if (currentStep < totalQuestions - 1) {
       setCurrentStep(currentStep + 1);
     } else {
-      // Calculate results
-      const calculated = matchPests(updatedAnswers);
+      // Calculate results with localized reasons
+      const calculated = diagnosePest(updatedAnswers, locale);
       setResults(calculated);
     }
   };
@@ -140,24 +138,55 @@ export default function PestIdentifierTool() {
   const handleUploadSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setUploadSubmitted(true);
+    // Open WhatsApp with direct pre-filled prompt
+    const msg =
+      locale === 'en'
+        ? `Hello, I am ${userName} (Phone: ${userPhone}). I have attached a pest photo for immediate identification.`
+        : `مرحباً، أنا ${userName} (رقم الهاتف: ${userPhone}). أرسل لكم صورة حشرة لفحصها وتشخيصها مجاناً.`;
+    setTimeout(() => {
+      window.open(`${company.whatsappUrl}?text=${encodeURIComponent(msg)}`, '_blank');
+    }, 1000);
   };
 
   // Filtered encyclopedia pests
-  const filteredEncyclopedia = PEST_DATABASE.filter((pest) => {
-    const matchesCat = selectedCategory === 'all' || pest.category === selectedCategory;
+  const filteredEncyclopedia = pestDatabase.filter((pest) => {
+    const matchesCat =
+      selectedCategory === 'all' ||
+      pest.categoryKey === selectedCategory ||
+      pest.category === selectedCategory;
+    const q = searchQuery.toLowerCase();
     const matchesSearch =
       pest.nameAr.includes(searchQuery) ||
-      pest.nameEn.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      pest.scientificName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      pest.shortDesc.includes(searchQuery);
+      pest.nameEn.toLowerCase().includes(q) ||
+      pest.scientificName.toLowerCase().includes(q) ||
+      pest.shortDesc.toLowerCase().includes(q);
     return matchesCat && matchesSearch;
   });
 
   const topMatch = results ? results[0] : null;
   const otherMatches = results ? results.slice(1, 4) : [];
 
+  const encyclopediaCategories =
+    locale === 'en'
+      ? [
+          { id: 'all', label: 'All Pests' },
+          { id: 'زواحف', label: 'Crawling Pests' },
+          { id: 'طائرات', label: 'Flying Pests' },
+          { id: 'قوارض', label: 'Rodents & Mice' },
+          { id: 'هياكل وخشب', label: 'Termites & Wood' },
+          { id: 'أثاث وفراش', label: 'Bed Bugs & Furniture' },
+        ]
+      : [
+          { id: 'all', label: 'كافة الآفات' },
+          { id: 'زواحف', label: 'الحشرات الزاحفة' },
+          { id: 'طائرات', label: 'الحشرات الطائرة' },
+          { id: 'قوارض', label: 'القوارض والفئران' },
+          { id: 'هياكل وخشب', label: 'النمل الأبيض وآفات الخشب' },
+          { id: 'أثاث وفراش', label: 'بق الفراش والمفروشات' },
+        ];
+
   return (
-    <div className="w-full text-right" dir="rtl">
+    <div className={`w-full ${isRTL ? 'text-right' : 'text-left'}`}>
       {/* Tab switchers */}
       <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 mb-8">
         <button
@@ -169,7 +198,7 @@ export default function PestIdentifierTool() {
           }`}
         >
           <Bug className="w-4 h-4" />
-          <span>اختبار التشخيص السريع (4 أسئلة)</span>
+          <span>{t.pestTabQuiz}</span>
         </button>
 
         <button
@@ -181,7 +210,7 @@ export default function PestIdentifierTool() {
           }`}
         >
           <Search className="w-4 h-4" />
-          <span>موسوعة الحشرات والآفات</span>
+          <span>{t.pestTabEncyclopedia}</span>
         </button>
 
         <button
@@ -193,14 +222,13 @@ export default function PestIdentifierTool() {
           }`}
         >
           <UploadCloud className="w-4 h-4" />
-          <span>إرسال صورة لخبير المركز الفني</span>
+          <span>{t.pestTabPhoto}</span>
         </button>
       </div>
 
       {/* TAB 1: INTERACTIVE WIZARD */}
       {activeTab === 'wizard' && (
         <div className="bg-white rounded-3xl shadow-xl border border-gray-100 p-6 sm:p-10 relative overflow-hidden">
-          {/* Decorative background aura */}
           <div className="absolute top-0 left-0 w-72 h-72 bg-[#C7F268]/20 rounded-full blur-3xl pointer-events-none" />
 
           {!results ? (
@@ -211,9 +239,16 @@ export default function PestIdentifierTool() {
                 <div className="flex items-center justify-between mb-3 text-xs font-bold text-gray-500">
                   <span className="flex items-center gap-1 text-[#033F2D]">
                     <span className="w-2 h-2 rounded-full bg-[#C7F268]" />
-                    <span>السؤال {currentStep + 1} من {totalQuestions}</span>
+                    <span>
+                      {locale === 'en'
+                        ? `Question ${currentStep + 1} of ${totalQuestions}`
+                        : `السؤال ${currentStep + 1} من ${totalQuestions}`}
+                    </span>
                   </span>
-                  <span>{Math.round(((currentStep + 1) / totalQuestions) * 100)}% مكتمل</span>
+                  <span>
+                    {Math.round(((currentStep + 1) / totalQuestions) * 100)}%{' '}
+                    {locale === 'en' ? 'Complete' : 'مكتمل'}
+                  </span>
                 </div>
 
                 {/* Progress Bar */}
@@ -226,19 +261,19 @@ export default function PestIdentifierTool() {
               </div>
 
               {/* Question Title & Prompt */}
-              <div className="mb-8 text-center sm:text-right">
+              <div className={`mb-8 ${isRTL ? 'text-right' : 'text-left'}`}>
                 <span className="inline-block px-3 py-1 bg-[#C7F268]/30 text-[#033F2D] text-xs font-extrabold rounded-full mb-2">
-                  تشخيص تفاعلي فوري
+                  {locale === 'en' ? 'Interactive Instant Diagnosis' : 'تشخيص تفاعلي فوري'}
                 </span>
                 <h3 className="text-2xl sm:text-3xl font-extrabold text-[#033F2D] mb-2 leading-tight">
-                  {currentQuestion.title}
+                  {currentQuestion?.title}
                 </h3>
-                <p className="text-gray-600 text-sm">{currentQuestion.subtitle}</p>
+                <p className="text-gray-600 text-sm">{currentQuestion?.subtitle}</p>
               </div>
 
               {/* Options Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
-                {currentQuestion.options.map((option) => {
+                {currentQuestion?.options.map((option) => {
                   const IconComp = iconMap[option.icon] || Bug;
                   const isSelected = answers[currentQuestion.id as keyof QuizAnswers] === option.value;
 
@@ -248,7 +283,9 @@ export default function PestIdentifierTool() {
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       onClick={() => handleSelectOption(currentQuestion.id, option.value)}
-                      className={`flex items-start gap-4 p-5 rounded-2xl text-right transition-all duration-200 cursor-pointer border ${
+                      className={`flex items-start gap-4 p-5 rounded-2xl ${
+                        isRTL ? 'text-right' : 'text-left'
+                      } transition-all duration-200 cursor-pointer border ${
                         isSelected
                           ? 'bg-[#033F2D] text-white border-[#033F2D] shadow-lg ring-2 ring-[#C7F268]'
                           : 'bg-[#F4F6F4]/50 hover:bg-[#F4F6F4] text-[#033F2D] border-gray-200 hover:border-[#033F2D]/30'
@@ -299,7 +336,7 @@ export default function PestIdentifierTool() {
                   className="flex items-center gap-1.5 text-xs font-bold text-gray-500 hover:text-red-600 transition-colors cursor-pointer"
                 >
                   <RotateCcw className="w-3.5 h-3.5" />
-                  <span>إعادة البدء من جديد</span>
+                  <span>{t.pestResetBtn}</span>
                 </button>
 
                 {currentStep > 0 && (
@@ -307,8 +344,8 @@ export default function PestIdentifierTool() {
                     onClick={handleBack}
                     className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-[#033F2D] text-xs font-bold transition-colors cursor-pointer"
                   >
-                    <ArrowRight className="w-3.5 h-3.5" />
-                    <span>السؤال السابق</span>
+                    {isRTL ? <ArrowRight className="w-3.5 h-3.5" /> : <ArrowLeft className="w-3.5 h-3.5" />}
+                    <span>{t.pestPrevQuestionBtn}</span>
                   </button>
                 )}
               </div>
@@ -333,10 +370,10 @@ export default function PestIdentifierTool() {
                       </div>
                       <div>
                         <span className="text-xs uppercase tracking-wider text-[#C7F268] font-bold">
-                          تقرير التشخيص الفوري للآفة
+                          {t.pestResultReportBadge}
                         </span>
                         <h4 className="text-xl sm:text-2xl font-black text-white">
-                          النتيجة المرجحة الأقرب لحالتك
+                          {t.pestResultTitle}
                         </h4>
                       </div>
                     </div>
@@ -346,58 +383,59 @@ export default function PestIdentifierTool() {
                       className="flex items-center gap-1.5 text-xs font-bold text-white/80 hover:text-[#C7F268] bg-white/10 hover:bg-white/20 px-3.5 py-2 rounded-xl transition-colors cursor-pointer"
                     >
                       <RotateCcw className="w-3.5 h-3.5" />
-                      <span>إعادة الاختبار</span>
+                      <span>{t.pestRetakeQuizBtn}</span>
                     </button>
                   </div>
 
-                  {/* Top Match Pest Card */}
+                  {/* Primary Pest Result Card */}
                   {topMatch && (
-                    <div className="bg-white text-[#033F2D] rounded-2xl p-6 sm:p-8 shadow-lg grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
-                      <div className="lg:col-span-4 relative h-56 sm:h-64 rounded-xl overflow-hidden shadow-md">
+                    <div className="grid grid-cols-1 md:grid-cols-12 gap-6 bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-md">
+                      <div className="md:col-span-4 relative aspect-[4/3] rounded-xl overflow-hidden shadow-lg border border-white/20">
                         <Image
                           src={topMatch.pest.image}
-                          alt={topMatch.pest.nameAr}
+                          alt={locale === 'en' ? topMatch.pest.nameEn : topMatch.pest.nameAr}
                           fill
                           className="object-cover"
                           referrerPolicy="no-referrer"
                         />
-                        <div className="absolute top-3 right-3 px-3 py-1 rounded-full bg-[#033F2D]/90 text-[#C7F268] text-xs font-black backdrop-blur-sm">
-                          تطابق بنسبة {topMatch.score}%
-                        </div>
-                        <div className="absolute bottom-3 right-3 left-3">
-                          <span
-                            className={`inline-block px-3 py-1 rounded-lg text-xs font-black ${topMatch.pest.riskColor} border shadow-sm`}
-                          >
-                            مستوى الخطورة: {topMatch.pest.riskLevel}
-                          </span>
+                        <div
+                          className={`absolute top-2.5 ${
+                            isRTL ? 'right-2.5' : 'left-2.5'
+                          } px-2.5 py-0.5 rounded-full bg-[#C7F268] text-[#033F2D] text-xs font-black shadow-md`}
+                        >
+                          {locale === 'en' ? `${topMatch.score}% Match` : `تطابق ${topMatch.score}%`}
                         </div>
                       </div>
 
-                      <div className="lg:col-span-8 space-y-4">
+                      <div className="md:col-span-8 space-y-4">
                         <div>
-                          <div className="flex items-center gap-2">
-                            <h3 className="text-2xl font-black text-[#033F2D]">
-                              {topMatch.pest.nameAr}
-                            </h3>
-                            <span className="text-xs text-gray-500 font-medium italic">
-                              ({topMatch.pest.scientificName})
+                          <div className="flex flex-wrap items-center gap-2 mb-1">
+                            <span className="text-xs font-bold text-[#C7F268] uppercase">
+                              {topMatch.pest.category}
+                            </span>
+                            <span className="text-white/40">•</span>
+                            <span className="text-xs text-white/70 italic">
+                              {topMatch.pest.scientificName}
                             </span>
                           </div>
-                          <p className="text-gray-600 text-sm mt-2 leading-relaxed">
-                            {topMatch.pest.shortDesc}
-                          </p>
+                          <h3 className="text-2xl font-black text-white">
+                            {locale === 'en' ? topMatch.pest.nameEn : topMatch.pest.nameAr}
+                          </h3>
                         </div>
 
-                        {/* Matching reasons */}
-                        <div className="bg-[#F4F6F4] p-4 rounded-xl space-y-2 border border-gray-100">
-                          <h5 className="text-xs font-black text-[#033F2D] flex items-center gap-1.5">
-                            <CheckCircle2 className="w-4 h-4 text-[#033F2D]" />
-                            <span>لماذا تم ترشيح هذه النتيجة بناءً على إجاباتك؟</span>
-                          </h5>
-                          <ul className="space-y-1 text-xs text-gray-700">
-                            {topMatch.matchingReasons.map((r, idx) => (
-                              <li key={idx} className="flex items-center gap-2">
-                                <span className="w-1.5 h-1.5 rounded-full bg-[#033F2D]" />
+                        <p className="text-white/80 text-sm leading-relaxed">
+                          {topMatch.pest.shortDesc}
+                        </p>
+
+                        {/* Match Reasons */}
+                        <div className="bg-black/20 p-3.5 rounded-xl border border-white/10 space-y-1.5">
+                          <span className="text-xs font-bold text-[#C7F268] block">
+                            {t.pestMatchReasons}:
+                          </span>
+                          <ul className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-xs text-white/90">
+                            {topMatch.reasons.map((r, idx) => (
+                              <li key={idx} className="flex items-center gap-1.5">
+                                <span className="w-1.5 h-1.5 rounded-full bg-[#C7F268]" />
                                 <span>{r}</span>
                               </li>
                             ))}
@@ -408,15 +446,15 @@ export default function PestIdentifierTool() {
                         <div className="flex flex-wrap items-center gap-3 pt-2">
                           <button
                             onClick={() => handleOpenBookingForPest(topMatch.pest)}
-                            className="btn-default py-3 px-6 text-sm font-bold flex-1 sm:flex-initial text-center justify-center cursor-pointer"
+                            className="bg-[#C7F268] hover:bg-[#b5e050] text-[#033F2D] py-3 px-6 rounded-xl text-sm font-bold flex-1 sm:flex-initial text-center justify-center cursor-pointer transition-transform hover:scale-[1.02] shadow-md inline-flex items-center gap-2"
                           >
-                            <Calendar className="w-4 h-4 ml-1.5" />
-                            <span>احجز فحصاً مجانياً لهذه الآفة</span>
+                            <Calendar className="w-4 h-4" />
+                            <span>{t.pestBookInspectionForThis}</span>
                           </button>
 
                           <a
                             href={company.phonePrimaryRaw}
-                            className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm transition-colors cursor-pointer"
+                            className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm transition-colors cursor-pointer"
                             dir="ltr"
                           >
                             <Phone className="w-4 h-4" />
@@ -427,16 +465,16 @@ export default function PestIdentifierTool() {
                             href={company.whatsappUrl}
                             target="_blank"
                             rel="noreferrer"
-                            className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-full bg-[#25D366] hover:bg-[#20ba59] text-white font-bold text-sm transition-colors cursor-pointer"
+                            className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-[#25D366] hover:bg-[#20ba59] text-white font-bold text-sm transition-colors cursor-pointer"
                           >
-                            <span>تواصل واتساب</span>
+                            <span>{t.whatsappNow}</span>
                           </a>
 
                           <Link
                             href={`/services/${topMatch.pest.recommendedServiceSlug}`}
-                            className="text-xs font-bold text-[#033F2D] hover:underline px-3 py-2"
+                            className="text-xs font-bold text-[#C7F268] hover:underline px-3 py-2"
                           >
-                            تفاصيل الخدمة المقترحة
+                            {locale === 'en' ? 'View Recommended Service' : 'تفاصيل الخدمة المقترحة'}
                           </Link>
                         </div>
                       </div>
@@ -444,7 +482,7 @@ export default function PestIdentifierTool() {
                   )}
                 </div>
 
-                {/* Practical Advice Grid: DIY Steps vs What NOT to do */}
+                {/* Practical Advice Grid */}
                 {topMatch && (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* First Aid / DIY steps */}
@@ -454,7 +492,7 @@ export default function PestIdentifierTool() {
                           <ShieldCheck className="w-5 h-5" />
                         </div>
                         <h4 className="text-base font-black">
-                          إجراءات وقائية فورية يمكنك اتخاذها الآن:
+                          {t.pestAdviceTitle}
                         </h4>
                       </div>
                       <ul className="space-y-2.5 text-xs sm:text-sm text-emerald-950">
@@ -474,7 +512,7 @@ export default function PestIdentifierTool() {
                           <AlertTriangle className="w-5 h-5" />
                         </div>
                         <h4 className="text-base font-black">
-                          أخطاء شائعة يجب تجنبها تماماً:
+                          {t.pestMistakesTitle}
                         </h4>
                       </div>
                       <ul className="space-y-2.5 text-xs sm:text-sm text-red-950">
@@ -493,7 +531,9 @@ export default function PestIdentifierTool() {
                 {otherMatches.length > 0 && (
                   <div className="pt-6 border-t border-gray-100">
                     <h4 className="text-lg font-black text-[#033F2D] mb-4">
-                      احتمالات أخرى متقاربة قد ترغب في مراجعتها:
+                      {locale === 'en'
+                        ? 'Other potential matching pests:'
+                        : 'احتمالات أخرى متقاربة قد ترغب في مراجعتها:'}
                     </h4>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                       {otherMatches.map((item) => (
@@ -505,17 +545,21 @@ export default function PestIdentifierTool() {
                             <div className="relative h-32 w-full rounded-xl overflow-hidden mb-3">
                               <Image
                                 src={item.pest.image}
-                                alt={item.pest.nameAr}
+                                alt={locale === 'en' ? item.pest.nameEn : item.pest.nameAr}
                                 fill
                                 className="object-cover"
                                 referrerPolicy="no-referrer"
                               />
-                              <span className="absolute top-2 right-2 px-2 py-0.5 bg-[#033F2D]/80 text-[#C7F268] text-[10px] font-bold rounded-md">
-                                تطابق {item.score}%
+                              <span
+                                className={`absolute top-2 ${
+                                  isRTL ? 'right-2' : 'left-2'
+                                } px-2 py-0.5 bg-[#033F2D]/80 text-[#C7F268] text-[10px] font-bold rounded-md`}
+                              >
+                                {locale === 'en' ? `${item.score}% Match` : `تطابق ${item.score}%`}
                               </span>
                             </div>
                             <h5 className="font-bold text-[#033F2D] text-sm mb-1">
-                              {item.pest.nameAr}
+                              {locale === 'en' ? item.pest.nameEn : item.pest.nameAr}
                             </h5>
                             <p className="text-xs text-gray-500 line-clamp-2 mb-3">
                               {item.pest.shortDesc}
@@ -526,7 +570,7 @@ export default function PestIdentifierTool() {
                             onClick={() => handleOpenBookingForPest(item.pest)}
                             className="w-full py-2 px-3 rounded-lg bg-white border border-gray-200 hover:bg-[#C7F268]/30 hover:border-[#C7F268] text-[#033F2D] text-xs font-bold transition-colors cursor-pointer text-center"
                           >
-                            طلب فحص لهذه الحشرة
+                            {locale === 'en' ? 'Book Inspection' : 'طلب فحص لهذه الحشرة'}
                           </button>
                         </div>
                       ))}
@@ -545,36 +589,43 @@ export default function PestIdentifierTool() {
           <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-8">
             <div>
               <h3 className="text-2xl font-extrabold text-[#033F2D]">
-                دليل وموسوعة الآفات المنزلية والتجارية
+                {locale === 'en'
+                  ? 'Residential & Commercial Pest Encyclopedia'
+                  : 'دليل وموسوعة الآفات المنزلية والتجارية'}
               </h3>
               <p className="text-gray-600 text-sm mt-1">
-                تصفح كافة الفصائل الشائعة، دورات حياتها، وأفضل الطرق لمكافحتها
+                {locale === 'en'
+                  ? 'Browse common species, their behaviors, and safe eradication procedures'
+                  : 'تصفح كافة الفصائل الشائعة، دورات حياتها، وأفضل الطرق لمكافحتها'}
               </p>
             </div>
 
             {/* Search Input */}
             <div className="relative w-full md:w-72">
-              <Search className="w-4 h-4 text-gray-400 absolute right-3.5 top-3.5" />
+              <Search
+                className={`w-4 h-4 text-gray-400 absolute ${
+                  isRTL ? 'right-3.5' : 'left-3.5'
+                } top-3.5`}
+              />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="ابحث بالاسم أو الأعراض..."
-                className="w-full bg-[#F4F6F4] text-sm pr-10 pl-4 py-2.5 rounded-full border border-gray-200 focus:outline-none focus:border-[#033F2D]"
+                placeholder={
+                  locale === 'en'
+                    ? 'Search by name or symptom...'
+                    : 'ابحث بالاسم أو الأعراض...'
+                }
+                className={`w-full bg-[#F4F6F4] text-sm ${
+                  isRTL ? 'pr-10 pl-4 text-right' : 'pl-10 pr-4 text-left'
+                } py-2.5 rounded-full border border-gray-200 focus:outline-none focus:border-[#033F2D]`}
               />
             </div>
           </div>
 
           {/* Category Filters */}
           <div className="flex flex-wrap items-center gap-2 mb-8">
-            {[
-              { id: 'all', label: 'كافة الآفات' },
-              { id: 'زواحف', label: 'الحشرات الزاحفة' },
-              { id: 'طائرات', label: 'الحشرات الطائرة' },
-              { id: 'قوارض', label: 'القوارض والفئران' },
-              { id: 'هياكل وخشب', label: 'النمل الأبيض وآفات الخشب' },
-              { id: 'أثاث وفراش', label: 'بق الفراش والمفروشات' },
-            ].map((cat) => (
+            {encyclopediaCategories.map((cat) => (
               <button
                 key={cat.id}
                 onClick={() => setSelectedCategory(cat.id)}
@@ -600,15 +651,23 @@ export default function PestIdentifierTool() {
                   <div className="relative h-44 w-full">
                     <Image
                       src={pest.image}
-                      alt={pest.nameAr}
+                      alt={locale === 'en' ? pest.nameEn : pest.nameAr}
                       fill
                       className="object-cover"
                       referrerPolicy="no-referrer"
                     />
-                    <div className="absolute top-3 right-3 px-2.5 py-1 rounded-md bg-[#033F2D]/80 text-[#C7F268] text-xs font-black backdrop-blur-sm">
+                    <div
+                      className={`absolute top-3 ${
+                        isRTL ? 'right-3' : 'left-3'
+                      } px-2.5 py-1 rounded-md bg-[#033F2D]/80 text-[#C7F268] text-xs font-black backdrop-blur-sm`}
+                    >
                       {pest.category}
                     </div>
-                    <div className="absolute bottom-3 right-3">
+                    <div
+                      className={`absolute bottom-3 ${
+                        isRTL ? 'right-3' : 'left-3'
+                      }`}
+                    >
                       <span
                         className={`inline-block px-2.5 py-0.5 rounded text-[11px] font-bold ${pest.riskColor} border`}
                       >
@@ -619,13 +678,17 @@ export default function PestIdentifierTool() {
 
                   <div className="p-5 space-y-3">
                     <div>
-                      <h4 className="text-lg font-bold text-[#033F2D]">{pest.nameAr}</h4>
+                      <h4 className="text-lg font-bold text-[#033F2D]">
+                        {locale === 'en' ? pest.nameEn : pest.nameAr}
+                      </h4>
                       <p className="text-xs text-gray-500 italic">{pest.scientificName}</p>
                     </div>
                     <p className="text-xs text-gray-600 leading-relaxed">{pest.shortDesc}</p>
 
                     <div className="space-y-1.5 text-xs text-gray-700">
-                      <span className="font-bold text-[#033F2D] block">العلامات الدالة:</span>
+                      <span className="font-bold text-[#033F2D] block">
+                        {locale === 'en' ? 'Identifying Traits:' : 'العلامات الدالة:'}
+                      </span>
                       {pest.matchedTraits.map((trait, idx) => (
                         <div key={idx} className="flex items-center gap-1.5 text-[11px]">
                           <span className="w-1 h-1 rounded-full bg-[#033F2D]" />
@@ -639,10 +702,10 @@ export default function PestIdentifierTool() {
                 <div className="p-5 pt-0">
                   <button
                     onClick={() => handleOpenBookingForPest(pest)}
-                    className="w-full btn-default py-2.5 text-xs font-bold text-center justify-center cursor-pointer"
+                    className="w-full bg-[#033F2D] hover:bg-[#022A1E] text-white py-2.5 px-4 rounded-xl text-xs font-bold text-center justify-center cursor-pointer transition-colors inline-flex items-center gap-1.5"
                   >
-                    <span>طلب معاينة وإبادة للآفة</span>
-                    <ArrowLeft className="w-3.5 h-3.5 mr-1" />
+                    <span>{t.pestBookInspectionForThis}</span>
+                    {isRTL ? <ArrowLeft className="w-3.5 h-3.5" /> : <ArrowRight className="w-3.5 h-3.5" />}
                   </button>
                 </div>
               </div>
@@ -659,10 +722,14 @@ export default function PestIdentifierTool() {
               <UploadCloud className="w-8 h-8" />
             </div>
             <h3 className="text-2xl font-extrabold text-[#033F2D]">
-              أرسل صورة الحشرة أو آثارها لأخصائي المركز الفني
+              {locale === 'en'
+                ? 'Send Pest Photo to Field Technical Specialist'
+                : 'أرسل صورة الحشرة أو آثارها لأخصائي المركز الفني'}
             </h3>
             <p className="text-gray-600 text-sm mt-2 max-w-md mx-auto leading-relaxed">
-              إذا لم تكن متأكداً من نوع الآفة، التقط صورة واضحة من هاتفك وسيقوم فنيو المكافحة المتخصصون لدينا بالرد عليك فوراً مجاناً.
+              {locale === 'en'
+                ? 'If you are unsure of the pest type, snap a clear photo and our certified specialists will diagnose it via WhatsApp immediately for free.'
+                : 'إذا لم تكن متأكداً من نوع الآفة، التقط صورة واضحة من هاتفك وسيقوم فنيو المكافحة المتخصصون لدينا بالرد عليك فوراً مجاناً.'}
             </p>
           </div>
 
@@ -682,24 +749,30 @@ export default function PestIdentifierTool() {
                     <div className="relative h-48 w-full max-w-xs mx-auto rounded-xl overflow-hidden shadow-md">
                       <Image
                         src={uploadedImage}
-                        alt="صورة الحشرة المرفوعة"
+                        alt="Uploaded pest photo"
                         fill
                         className="object-cover"
                         referrerPolicy="no-referrer"
                       />
                     </div>
                     <span className="text-xs text-emerald-700 font-bold block">
-                      تم اختيار الصورة بنجاح! انقر لتغييرها.
+                      {locale === 'en'
+                        ? 'Photo selected successfully! Click to change.'
+                        : 'تم اختيار الصورة بنجاح! انقر لتغييرها.'}
                     </span>
                   </div>
                 ) : (
                   <div className="space-y-2">
                     <UploadCloud className="w-10 h-10 text-gray-400 mx-auto" />
                     <p className="text-sm font-bold text-[#033F2D]">
-                      انقر هنا لاختيار صورة من هاتفك أو جهازك
+                      {locale === 'en'
+                        ? 'Click here to choose a photo from your device'
+                        : 'انقر هنا لاختيار صورة من هاتفك أو جهازك'}
                     </p>
                     <p className="text-xs text-gray-500">
-                      يدعم صور JPG, PNG أو اللقطات المباشرة بالكاميرا
+                      {locale === 'en'
+                        ? 'Supports JPG, PNG or live camera captures'
+                        : 'يدعم صور JPG, PNG أو اللقطات المباشرة بالكاميرا'}
                     </p>
                   </div>
                 )}
@@ -709,39 +782,45 @@ export default function PestIdentifierTool() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-bold text-[#033F2D] mb-1.5">
-                    الاسم الكريم:
+                    {locale === 'en' ? 'Your Name:' : 'الاسم الكريم:'}
                   </label>
                   <input
                     type="text"
                     value={userName}
                     onChange={(e) => setUserName(e.target.value)}
-                    placeholder="مثال: محمد علي"
+                    placeholder={locale === 'en' ? 'John Doe' : 'مثال: محمد علي'}
                     required
-                    className="w-full bg-[#F4F6F4] text-sm px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:border-[#033F2D]"
+                    className={`w-full bg-[#F4F6F4] text-sm px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:border-[#033F2D] ${
+                      isRTL ? 'text-right' : 'text-left'
+                    }`}
                   />
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-[#033F2D] mb-1.5">
-                    رقم الهاتف:
+                    {locale === 'en' ? 'Phone Number:' : 'رقم الهاتف:'}
                   </label>
                   <input
                     type="tel"
                     value={userPhone}
                     onChange={(e) => setUserPhone(e.target.value)}
-                    placeholder="010xxxxxxxx"
+                    placeholder="010XXXXXXXX"
                     required
                     dir="ltr"
-                    className="w-full bg-[#F4F6F4] text-sm px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:border-[#033F2D] text-right"
+                    className="w-full bg-[#F4F6F4] text-sm px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:border-[#033F2D] text-left"
                   />
                 </div>
               </div>
 
               <button
                 type="submit"
-                className="w-full btn-default py-4 text-base font-bold text-center justify-center cursor-pointer shadow-lg"
+                className="w-full bg-[#C7F268] hover:bg-[#b5e050] text-[#033F2D] py-4 rounded-xl text-base font-bold text-center justify-center cursor-pointer shadow-lg inline-flex items-center gap-2 transition-all hover:scale-[1.01]"
               >
-                <span>إرسال الصورة للتشخيص المجاني المباشر</span>
-                <ArrowLeft className="w-5 h-5 mr-2" />
+                <span>
+                  {locale === 'en'
+                    ? 'Submit Photo for Direct Free WhatsApp Diagnosis'
+                    : 'إرسال الصورة للتشخيص المجاني المباشر'}
+                </span>
+                {isRTL ? <ArrowLeft className="w-5 h-5" /> : <ArrowRight className="w-5 h-5" />}
               </button>
             </form>
           ) : (
@@ -750,10 +829,14 @@ export default function PestIdentifierTool() {
                 <CheckCircle2 className="w-10 h-10" />
               </div>
               <h4 className="text-2xl font-black text-[#033F2D]">
-                تم استلام صورتك بنجاح!
+                {locale === 'en'
+                  ? 'Photo Received & Connecting to WhatsApp!'
+                  : 'تم استلام صورتك وجارٍ ربطك بالواتساب!'}
               </h4>
               <p className="text-sm text-gray-600 max-w-sm mx-auto leading-relaxed">
-                شكراً لك يا {userName || 'عميلنا العزيز'}. يقوم أخصائي الفحص الميداني لدينا بفحص الصورة الآن وسيتواصل معك على الرقم ({userPhone}) خلال 15 دقيقة لإعطائك التشخيص الدقيق مجاناً.
+                {locale === 'en'
+                  ? `Thank you, ${userName || 'valued customer'}. Our technician is analyzing your submission and will provide your free diagnosis on (${userPhone}).`
+                  : `شكراً لك يا ${userName || 'عميلنا العزيز'}. يقوم أخصائي الفحص الميداني لدينا بفحص الصورة الآن وسيتواصل معك على الرقم (${userPhone}) لإعطائك التشخيص الدقيق مجاناً.`}
               </p>
               <button
                 onClick={() => {
@@ -762,7 +845,7 @@ export default function PestIdentifierTool() {
                 }}
                 className="px-6 py-2.5 rounded-full bg-gray-100 text-[#033F2D] text-xs font-bold hover:bg-gray-200 transition-colors cursor-pointer"
               >
-                إرسال صورة أخرى
+                {locale === 'en' ? 'Send another photo' : 'إرسال صورة أخرى'}
               </button>
             </div>
           )}

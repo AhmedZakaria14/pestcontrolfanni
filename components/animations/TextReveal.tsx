@@ -25,7 +25,7 @@ export default function TextReveal({
   const isInView = useInView(ref, { once: true, margin: '-10% 0px -10% 0px' });
 
   // Split into words
-  const words = text.split(' ');
+  const words = (text || '').split(' ');
 
   const containerVariants: Record<string, any> = {
     hidden: { opacity: 0 },
@@ -48,7 +48,7 @@ export default function TextReveal({
       opacity: 1,
       transition: {
         duration: 0.65,
-        ease: [0.22, 1, 0.36, 1], // Cubic bezier smooth ease
+        ease: [0.22, 1, 0.36, 1],
       },
     },
   };
@@ -63,10 +63,12 @@ export default function TextReveal({
         className="inline-flex flex-wrap gap-x-[0.28em] gap-y-[0.1em]"
       >
         {words.map((word, index) => {
-          const cleanWord = word.replace(/[^a-zA-Z0-9&]/g, '');
-          const isHighlighted = highlightWords.some(
-            (hw) => cleanWord.toLowerCase() === hw.toLowerCase()
-          );
+          // Keep Unicode letters (Arabic, English, etc.) and numbers
+          const cleanWord = word.replace(/[^\p{L}\p{N}&]/gu, '').trim();
+          const isHighlighted = highlightWords.some((hw) => {
+            const cleanHw = hw.replace(/[^\p{L}\p{N}&]/gu, '').trim();
+            return cleanWord.toLowerCase() === cleanHw.toLowerCase();
+          });
 
           return (
             <span key={index} className="inline-block overflow-hidden py-[0.05em] -my-[0.05em]">

@@ -1,9 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { X, CheckCircle2, PhoneCall, ArrowLeft, MessageCircle } from 'lucide-react';
-import { SERVICES_DATA } from '@/lib/siteData';
-import { company } from '@/lib/company';
+import { X, CheckCircle2, PhoneCall, ArrowLeft, ArrowRight, MessageCircle } from 'lucide-react';
+import { useLanguage } from '@/lib/i18n';
 
 interface BookingModalProps {
   isOpen: boolean;
@@ -18,7 +17,11 @@ export default function BookingModal({
   defaultService,
   initialService: propInitialService,
 }: BookingModalProps) {
-  const chosenService = propInitialService || defaultService || SERVICES_DATA[0]?.title || 'مكافحة حشرات المنازل والفلل';
+  const { t, company, siteData, isRTL, locale } = useLanguage();
+
+  const chosenService =
+    propInitialService || defaultService || siteData.services[0]?.title || (locale === 'en' ? 'Residential Pest Control' : 'مكافحة حشرات المنازل والفلل');
+
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -33,8 +36,16 @@ export default function BookingModal({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitted(true);
-    // Prepare WhatsApp message
-    const message = `*طلب خدمة مكافحة جديدة عبر الموقع:*
+
+    const message =
+      locale === 'en'
+        ? `*New Pest Control Inspection Request:*
+• *Name:* ${formData.name}
+• *Phone:* ${formData.phone}
+• *Service:* ${formData.service}
+• *City / Area:* ${formData.area || 'Not specified'}
+• *Problem Details:* ${formData.notes || 'None'}`
+        : `*طلب خدمة مكافحة جديدة عبر الموقع:*
 • *الاسم:* ${formData.name}
 • *رقم الهاتف:* ${formData.phone}
 • *نوع الخدمة:* ${formData.service}
@@ -48,7 +59,12 @@ export default function BookingModal({
   };
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 text-right">
+    <div
+      className={`fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 ${
+        isRTL ? 'text-right' : 'text-left'
+      }`}
+      dir={isRTL ? 'rtl' : 'ltr'}
+    >
       <div
         className="relative w-full max-w-xl bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden animate-in fade-in zoom-in-95 duration-200"
         onClick={(e) => e.stopPropagation()}
@@ -57,23 +73,34 @@ export default function BookingModal({
         <div className="bg-[#033F2D] text-white p-6 relative">
           <button
             onClick={onClose}
-            className="absolute top-5 left-5 text-white/80 hover:text-white p-1 rounded-full hover:bg-white/10 transition-colors cursor-pointer"
-            aria-label="إغلاق"
+            className={`absolute top-5 ${
+              isRTL ? 'left-5' : 'right-5'
+            } text-white/80 hover:text-white p-1 rounded-full hover:bg-white/10 transition-colors cursor-pointer`}
+            aria-label="Close"
           >
             <X className="w-6 h-6" />
           </button>
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#C7F268]/20 text-[#C7F268] text-xs font-bold rounded-full tracking-wider mb-2">
-            طلب معاينة وخدمة مكافحة
+            {t.bookingBadge}
           </div>
-          <h3 className="text-xl sm:text-2xl font-bold text-white">المركز الفني المتخصص لمكافحة الحشرات</h3>
+          <h3 className="text-xl sm:text-2xl font-bold text-white">{company.name}</h3>
           <p className="text-white/80 text-xs sm:text-sm mt-1">
-            للتواصل المباشر والسريع: اتصل بنا على{' '}
-            <a href={company.phonePrimaryRaw} dir="ltr" className="text-[#C7F268] font-bold underline inline-block">
+            {t.bookingSubtitlePrompt}:{' '}
+            <a
+              href={company.phonePrimaryRaw}
+              dir="ltr"
+              className="text-[#C7F268] font-bold underline inline-block"
+            >
               {company.phonePrimary}
-            </a>
-            {' '}أو{' '}
-            <a href={company.whatsappUrl} target="_blank" rel="noreferrer" className="text-[#25D366] font-bold underline inline-block">
-              واتساب
+            </a>{' '}
+            {locale === 'en' ? 'or via' : 'أو عبر'}{' '}
+            <a
+              href={company.whatsappUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="text-[#25D366] font-bold underline inline-block"
+            >
+              WhatsApp
             </a>
           </p>
         </div>
@@ -85,19 +112,23 @@ export default function BookingModal({
               <div className="w-16 h-16 bg-[#C7F268]/30 text-[#033F2D] rounded-full flex items-center justify-center mx-auto">
                 <CheckCircle2 className="w-10 h-10" />
               </div>
-              <h4 className="text-xl font-bold text-[#033F2D]">تم تسجيل طلبك وجارٍ تحويلك للواتساب!</h4>
+              <h4 className="text-xl font-bold text-[#033F2D]">{t.bookingSuccessTitle}</h4>
               <p className="text-[#484C44] max-w-md mx-auto text-sm leading-relaxed">
-                شكراً لك يا <span className="font-bold">{formData.name}</span>. تم تجهيز تفاصيل طلبك لمتابعتها مع الفني المختص مباشرة عبر الواتساب أو الاتصال الهاتفي على <span className="font-bold" dir="ltr">{formData.phone}</span>.
+                {t.bookingSuccessDesc(formData.name, formData.phone)}
               </p>
               <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
                 <a
-                  href={`${company.whatsappUrl}?text=${encodeURIComponent(`مرحباً، أنا ${formData.name}، أود تأكيد طلبي لخدمة ${formData.service}`)}`}
+                  href={`${company.whatsappUrl}?text=${encodeURIComponent(
+                    locale === 'en'
+                      ? `Hello, I am ${formData.name}, confirming my request for ${formData.service}`
+                      : `مرحباً، أنا ${formData.name}، أود تأكيد طلبي لخدمة ${formData.service}`
+                  )}`}
                   target="_blank"
                   rel="noreferrer"
                   className="inline-flex items-center gap-2 bg-[#25D366] text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-[#20ba59] transition-colors"
                 >
                   <MessageCircle className="w-4 h-4" />
-                  <span>فتح محادثة الواتساب</span>
+                  <span>{t.bookingOpenWhatsappBtn}</span>
                 </a>
                 <button
                   type="button"
@@ -105,9 +136,9 @@ export default function BookingModal({
                     setSubmitted(false);
                     onClose();
                   }}
-                  className="px-5 py-2.5 rounded-xl bg-gray-100 text-gray-700 font-bold text-sm hover:bg-gray-200 transition-colors"
+                  className="px-5 py-2.5 rounded-xl bg-gray-100 text-gray-700 font-bold text-sm hover:bg-gray-200 transition-colors cursor-pointer"
                 >
-                  إغلاق
+                  {t.bookingCloseBtn}
                 </button>
               </div>
             </div>
@@ -116,28 +147,30 @@ export default function BookingModal({
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-bold text-[#033F2D] tracking-wider mb-1">
-                    الاسم بالكامل *
+                    {t.bookingNameLabel}
                   </label>
                   <input
                     type="text"
                     required
-                    placeholder="مثال: محمد علي"
+                    placeholder={t.bookingNamePlaceholder}
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:border-[#033F2D] focus:ring-1 focus:ring-[#033F2D] outline-none text-sm text-right"
+                    className={`w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:border-[#033F2D] focus:ring-1 focus:ring-[#033F2D] outline-none text-sm ${
+                      isRTL ? 'text-right' : 'text-left'
+                    }`}
                   />
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-[#033F2D] tracking-wider mb-1">
-                    رقم الهاتف (مصر) *
+                    {t.bookingPhoneLabel}
                   </label>
                   <input
                     type="tel"
                     required
-                    placeholder="010XXXXXXXX"
+                    placeholder={t.bookingPhonePlaceholder}
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:border-[#033F2D] focus:ring-1 focus:ring-[#033F2D] outline-none text-sm text-right"
+                    className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:border-[#033F2D] focus:ring-1 focus:ring-[#033F2D] outline-none text-sm text-left"
                     dir="ltr"
                   />
                 </div>
@@ -146,56 +179,74 @@ export default function BookingModal({
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-bold text-[#033F2D] tracking-wider mb-1">
-                    نوع الخدمة المطلوبة *
+                    {t.bookingServiceLabel}
                   </label>
                   <select
                     value={formData.service}
                     onChange={(e) => setFormData({ ...formData, service: e.target.value })}
-                    className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:border-[#033F2D] focus:ring-1 focus:ring-[#033F2D] outline-none text-sm bg-white text-right"
+                    className={`w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:border-[#033F2D] focus:ring-1 focus:ring-[#033F2D] outline-none text-sm bg-white ${
+                      isRTL ? 'text-right' : 'text-left'
+                    }`}
                   >
-                    {SERVICES_DATA.map((srv) => (
+                    {siteData.services.map((srv) => (
                       <option key={srv.id} value={srv.title}>
                         {srv.title}
                       </option>
                     ))}
-                    <option value="معاينة وفحص عام شامل">معاينة وفحص عام شامل</option>
-                    <option value="مكافحة طارئة وفورية">مكافحة طارئة وفورية</option>
+                    <option
+                      value={locale === 'en' ? 'General Full Inspection' : 'معاينة وفحص عام شامل'}
+                    >
+                      {locale === 'en' ? 'General Comprehensive Inspection' : 'معاينة وفحص عام شامل'}
+                    </option>
+                    <option
+                      value={locale === 'en' ? 'Emergency Rapid Pest Control' : 'مكافحة طارئة وفورية'}
+                    >
+                      {locale === 'en' ? 'Emergency Rapid Extermination' : 'مكافحة طارئة وفورية'}
+                    </option>
                   </select>
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-[#033F2D] tracking-wider mb-1">
-                    المنطقة أو المحافظة
+                    {t.bookingAreaLabel}
                   </label>
                   <input
                     type="text"
-                    placeholder="مثال: التجمع، مدينة نصر، الشيخ زايد..."
+                    placeholder={t.bookingAreaPlaceholder}
                     value={formData.area}
                     onChange={(e) => setFormData({ ...formData, area: e.target.value })}
-                    className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:border-[#033F2D] focus:ring-1 focus:ring-[#033F2D] outline-none text-sm text-right"
+                    className={`w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:border-[#033F2D] focus:ring-1 focus:ring-[#033F2D] outline-none text-sm ${
+                      isRTL ? 'text-right' : 'text-left'
+                    }`}
                   />
                 </div>
               </div>
 
               <div>
                 <label className="block text-xs font-bold text-[#033F2D] tracking-wider mb-1">
-                  ملاحظات أو نوع الحشرة الملاحظة (اختياري)
+                  {t.bookingNotesLabel}
                 </label>
                 <textarea
                   rows={2}
-                  placeholder="صِف المشكلة (مثال: صراصير في المطبخ، بق فراش في غرفة النوم، نمل أبيض...)"
+                  placeholder={t.bookingNotesPlaceholder}
                   value={formData.notes}
                   onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                  className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:border-[#033F2D] focus:ring-1 focus:ring-[#033F2D] outline-none text-sm resize-none text-right"
+                  className={`w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:border-[#033F2D] focus:ring-1 focus:ring-[#033F2D] outline-none text-sm resize-none ${
+                    isRTL ? 'text-right' : 'text-left'
+                  }`}
                 />
               </div>
 
               <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-3">
                 <span className="text-xs text-gray-500 flex items-center gap-1.5 order-2 sm:order-1">
-                  <PhoneCall className="w-3.5 h-3.5 text-[#033F2D]" /> تواصل فوري مباشر عبر الهاتف أو الواتساب
+                  <PhoneCall className="w-3.5 h-3.5 text-[#033F2D]" />
+                  <span>{t.directPhoneOrWhatsapp}</span>
                 </span>
-                <button type="submit" className="btn-default py-2.5 px-6 text-sm w-full sm:w-auto order-1 sm:order-2 font-bold">
-                  <span>إرسال وتأكيد الطلب</span>
-                  <ArrowLeft className="w-4 h-4 mr-2" />
+                <button
+                  type="submit"
+                  className="bg-[#C7F268] hover:bg-[#b5e050] text-[#033F2D] font-bold py-2.5 px-6 rounded-xl text-sm w-full sm:w-auto order-1 sm:order-2 flex items-center justify-center gap-2 cursor-pointer transition-all shadow-md"
+                >
+                  <span>{t.bookingSubmitBtn}</span>
+                  {isRTL ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
                 </button>
               </div>
             </form>

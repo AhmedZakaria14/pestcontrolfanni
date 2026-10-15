@@ -4,15 +4,23 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import PageBanner from '@/components/PageBanner';
 import WarrantyVerificationSection from '@/components/WarrantyVerificationSection';
+import { useLanguage } from '@/lib/i18n';
 
 export default function WarrantyVerifyPage() {
+  const { t, isRTL, dir } = useLanguage();
+
   return (
-    <div className="min-h-screen flex flex-col bg-white text-right" dir="rtl">
+    <div
+      className={`min-h-screen flex flex-col bg-white ${
+        isRTL ? 'text-right' : 'text-left'
+      }`}
+      dir={dir}
+    >
       <Header />
       <main className="flex-1">
         <PageBanner
-          title="التحقق من شهادة الضمان الإلكتروني"
-          breadcrumbs={[{ label: 'التحقق من الضمان' }]}
+          title={t.navWarranty}
+          breadcrumbs={[{ label: t.navWarranty }]}
         />
         <WarrantyVerificationSection />
       </main>

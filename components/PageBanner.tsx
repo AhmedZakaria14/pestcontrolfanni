@@ -1,9 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import { ChevronLeft } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import TextReveal from '@/components/animations/TextReveal';
 import { motion } from 'motion/react';
+import { useLanguage } from '@/lib/i18n';
 
 interface BreadcrumbItem {
   label: string;
@@ -16,6 +17,8 @@ interface PageBannerProps {
 }
 
 export default function PageBanner({ title, breadcrumbs }: PageBannerProps) {
+  const { t, isRTL } = useLanguage();
+
   return (
     <section className="relative bg-[#033F2D] text-white py-16 sm:py-24 overflow-hidden border-b border-white/10 text-center">
       {/* Decorative background glow */}
@@ -48,11 +51,15 @@ export default function PageBanner({ title, breadcrumbs }: PageBannerProps) {
           className="inline-flex items-center gap-2 text-sm text-white/80 bg-white/5 border border-white/10 px-4 py-1.5 rounded-full backdrop-blur-sm"
         >
           <Link href="/" className="hover:text-[#C7F268] transition-colors font-medium">
-            الرئيسية
+            {t.breadcrumbHome}
           </Link>
           {breadcrumbs.map((bc, idx) => (
             <div key={idx} className="flex items-center gap-2">
-              <ChevronLeft className="w-3.5 h-3.5 text-[#C7F268]" />
+              {isRTL ? (
+                <ChevronLeft className="w-3.5 h-3.5 text-[#C7F268]" />
+              ) : (
+                <ChevronRight className="w-3.5 h-3.5 text-[#C7F268]" />
+              )}
               {bc.href ? (
                 <Link href={bc.href} className="hover:text-[#C7F268] transition-colors font-medium">
                   {bc.label}

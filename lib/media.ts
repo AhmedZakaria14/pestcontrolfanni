@@ -25,5 +25,16 @@ export const CLASSIC_IMAGES = {
   classicService2: 'https://demo.awaikenthemes.com/bugfree/wp-content/uploads/2026/01/service-2.jpg',
 };
 
+export const PEST_IMAGES = {
+  cockroachGerman: '/images/pests/cockroach-german.jpg',
+  bedBug: '/images/pests/bed-bug.jpg',
+  termite: '/images/pests/termite.jpg',
+  mouseRodent: '/images/pests/mouse-rodent.jpg',
+  blackAnt: '/images/pests/black-ant.jpg',
+  mosquito: '/images/pests/mosquito.jpg',
+  waspHornet: '/images/pests/wasp-hornet.jpg',
+  pantryBeetle: '/images/pests/pantry-beetle.jpg',
+};
+
 export default COMPANY_IMAGES;
 

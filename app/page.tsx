@@ -20,14 +20,19 @@ import BlogSection from '@/components/home2/BlogSection';
 import PestIdentifierTeaser from '@/components/home2/PestIdentifierTeaser';
 import BookingModal from '@/components/BookingModal';
 import VideoModal from '@/components/VideoModal';
-import { company } from '@/lib/company';
+import JsonLd from '@/components/JsonLd';
+import { getLocalBusinessWithServicesSchema } from '@/lib/schema';
+import { useLanguage } from '@/lib/i18n';
 
 export default function HomePage() {
   const [bookingOpen, setBookingOpen] = useState(false);
   const [videoOpen, setVideoOpen] = useState(false);
+  const { dir, locale, t } = useLanguage();
+  const homeSchema = getLocalBusinessWithServicesSchema(locale);
 
   return (
-    <div className="min-h-screen flex flex-col bg-white" dir="rtl">
+    <div className="min-h-screen flex flex-col bg-white" dir={dir}>
+      <JsonLd id="schema-home-services" data={homeSchema} />
       {/* Header */}
       <Header />
 
@@ -66,7 +71,7 @@ export default function HomePage() {
         <PricingSection onOpenBooking={() => setBookingOpen(true)} />
 
         {/* Gallery Section */}
-        <GallerySection />
+        <GallerySection onOpenVideo={() => setVideoOpen(true)} />
 
         {/* Warranty Verification Section */}
         <WarrantyVerificationSection />
@@ -93,7 +98,12 @@ export default function HomePage() {
       <VideoModal
         isOpen={videoOpen}
         onClose={() => setVideoOpen(false)}
-        title={company.name}
+        title={
+          locale === 'en'
+            ? 'Live Field Video - Technical Specialized Pest Control Center'
+            : 'تغطية ميدانية مباشرة - المركز الفني المتخصص لمكافحة الحشرات'
+        }
+        videoUrl="https://www.facebook.com/share/r/1ESucCbJEJ/"
       />
     </div>
   );

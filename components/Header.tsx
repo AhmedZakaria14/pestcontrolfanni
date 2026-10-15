@@ -9,21 +9,22 @@ import {
   Menu,
   ChevronDown,
   ArrowLeft,
+  ArrowRight,
   ShieldCheck,
   MessageCircle,
   Award,
-  Sparkles,
 } from 'lucide-react';
-import { SERVICES_DATA } from '@/lib/siteData';
-import { company } from '@/lib/company';
 import Logo from '@/components/Logo';
 import OffcanvasDrawer from './OffcanvasDrawer';
 import BookingModal from './BookingModal';
+import LanguageSwitcher from './LanguageSwitcher';
+import { useLanguage } from '@/lib/i18n';
 
 export default function Header() {
   const pathname = usePathname();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [bookingOpen, setBookingOpen] = useState(false);
+  const { t, company, siteData, isRTL, locale } = useLanguage();
 
   return (
     <>
@@ -48,7 +49,9 @@ export default function Header() {
                 dir="ltr"
               >
                 <MessageCircle className="w-3.5 h-3.5 text-[#25D366]" />
-                <span>واتساب: {company.whatsapp}</span>
+                <span>
+                  {locale === 'ar' ? 'واتساب:' : 'WhatsApp:'} {company.whatsapp}
+                </span>
               </a>
               <div className="flex items-center gap-1.5 text-white/70">
                 <Clock className="w-3.5 h-3.5 text-[#C7F268]" />
@@ -59,8 +62,11 @@ export default function Header() {
             <div className="flex items-center gap-4 text-white/80">
               <span className="text-[12px] text-[#C7F268] font-bold flex items-center gap-1.5">
                 <ShieldCheck className="w-3.5 h-3.5" />
-                <span>المركز الفني المتخصص بمصر • مبيدات معتمدة بدون روائح</span>
+                <span>{t.headerTopNotice}</span>
               </span>
+              <div className="border-s border-white/20 ps-3">
+                <LanguageSwitcher variant="header" />
+              </div>
             </div>
           </div>
         </div>
@@ -73,7 +79,7 @@ export default function Header() {
           </Link>
 
           {/* Classic Desktop Navigation Links */}
-          <nav className="hidden lg:flex items-center gap-5 xl:gap-7 text-sm font-bold text-white">
+          <nav className="hidden lg:flex items-center gap-4 xl:gap-6 text-sm font-bold text-white">
             <Link
               href="/"
               className={`transition-colors py-1 border-b-2 ${
@@ -82,7 +88,7 @@ export default function Header() {
                   : 'border-transparent text-white/90 hover:text-[#C7F268]'
               }`}
             >
-              الرئيسية
+              {t.navHome}
             </Link>
 
             <Link
@@ -93,7 +99,7 @@ export default function Header() {
                   : 'border-transparent text-white/90 hover:text-[#C7F268]'
               }`}
             >
-              عن المركز
+              {t.navAbout}
             </Link>
 
             {/* Services dropdown */}
@@ -106,20 +112,28 @@ export default function Header() {
                     : 'border-transparent text-white/90 hover:text-[#C7F268]'
                 }`}
               >
-                <span>الخدمات</span>
+                <span>{t.navServices}</span>
                 <ChevronDown className="w-4 h-4 transition-transform group-hover:rotate-180" />
               </Link>
 
-              {/* Classic Fast Hover Dropdown */}
-              <div className="absolute top-full right-0 pt-2 w-72 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-150 z-50">
-                <div className="bg-white text-[#033F2D] rounded-xl shadow-2xl border border-gray-100 py-2.5 overflow-hidden text-right">
+              {/* Fast Hover Dropdown */}
+              <div
+                className={`absolute top-full pt-2 w-72 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-150 z-50 ${
+                  isRTL ? 'right-0' : 'left-0'
+                }`}
+              >
+                <div
+                  className={`bg-white text-[#033F2D] rounded-xl shadow-2xl border border-gray-100 py-2.5 overflow-hidden ${
+                    isRTL ? 'text-right' : 'text-left'
+                  }`}
+                >
                   <Link
                     href="/services"
                     className="block px-5 py-2.5 text-sm font-bold hover:bg-[#C7F268]/20 transition-colors border-b border-gray-100 text-[#033F2D]"
                   >
-                    جميع خدمات المكافحة
+                    {t.navAllServices}
                   </Link>
-                  {SERVICES_DATA.map((srv) => (
+                  {siteData.services.map((srv) => (
                     <Link
                       key={srv.id}
                       href={`/services/${srv.slug}`}
@@ -140,9 +154,9 @@ export default function Header() {
                   : 'border-transparent text-white/90 hover:text-[#C7F268]'
               }`}
             >
-              <span>تشخيص الحشرات</span>
+              <span>{t.navPestIdentifier}</span>
               <span className="px-1.5 py-0.5 rounded-full bg-[#C7F268] text-[#033F2D] text-[10px] font-black leading-none">
-                ذكي
+                {t.navPestIdentifierBadge}
               </span>
             </Link>
 
@@ -155,7 +169,7 @@ export default function Header() {
               }`}
             >
               <Award className="w-4 h-4 text-[#C7F268]" />
-              <span>التحقق من الضمان</span>
+              <span>{t.navWarranty}</span>
             </Link>
 
             <Link
@@ -166,7 +180,7 @@ export default function Header() {
                   : 'border-transparent text-white/90 hover:text-[#C7F268]'
               }`}
             >
-              أعمال ميدانية
+              {t.navProjects}
             </Link>
 
             <Link
@@ -177,36 +191,41 @@ export default function Header() {
                   : 'border-transparent text-white/90 hover:text-[#C7F268]'
               }`}
             >
-              تواصل معنا
+              {t.navContact}
             </Link>
           </nav>
 
-          {/* Left Action Buttons */}
-          <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
+          {/* Action Buttons & Switcher */}
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            {/* Mobile language switch badge in main navbar */}
+            <div className="md:hidden">
+              <LanguageSwitcher variant="compact" />
+            </div>
+
             <a
               href={company.whatsappUrl}
               target="_blank"
               rel="noreferrer"
               className="hidden xl:inline-flex items-center gap-1.5 bg-[#25D366] hover:bg-[#20ba59] text-white py-2 px-3.5 rounded-xl text-xs font-bold transition-colors shadow-md"
-              title="تواصل معنا عبر واتساب"
+              title={t.headerWhatsappBtn}
             >
               <MessageCircle className="w-4 h-4" />
-              <span>واتساب</span>
+              <span>{t.headerWhatsappBtn}</span>
             </a>
 
             <button
               onClick={() => setBookingOpen(true)}
-              className="bg-[#C7F268] hover:bg-[#b5e050] text-[#033F2D] font-bold py-2.5 px-4 sm:px-6 text-xs sm:text-sm rounded-xl transition-all shadow-md inline-flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
+              className="bg-[#C7F268] hover:bg-[#b5e050] text-[#033F2D] font-bold py-2.5 px-3.5 sm:px-5 text-xs sm:text-sm rounded-xl transition-all shadow-md inline-flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
             >
-              <span>حجز خدمة</span>
-              <ArrowLeft className="w-4 h-4" />
+              <span>{t.headerBookBtn}</span>
+              {isRTL ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
             </button>
 
             {/* Mobile Hamburger Button */}
             <button
               onClick={() => setDrawerOpen(true)}
               className="lg:hidden w-10 h-10 rounded-xl bg-white/10 hover:bg-[#C7F268] hover:text-[#033F2D] text-white flex items-center justify-center transition-colors cursor-pointer border border-white/10"
-              aria-label="فتح القائمة"
+              aria-label={t.headerMenuAria}
             >
               <Menu className="w-6 h-6 stroke-[2.2]" />
             </button>
@@ -229,4 +248,3 @@ export default function Header() {
     </>
   );
 }
-

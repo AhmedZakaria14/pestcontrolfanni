@@ -3,61 +3,102 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'motion/react';
-import { ArrowLeft, ShieldCheck, Leaf, MessageCircle, Phone, CheckCircle2, ChevronRight, ChevronLeft } from 'lucide-react';
+import {
+  ArrowLeft,
+  ArrowRight,
+  ShieldCheck,
+  Leaf,
+  MessageCircle,
+  Phone,
+  CheckCircle2,
+  ChevronRight,
+  ChevronLeft,
+  Play,
+} from 'lucide-react';
 import TextReveal from '@/components/animations/TextReveal';
-import { company } from '@/lib/company';
-import { COMPANY_IMAGES, CLASSIC_IMAGES } from '@/lib/media';
+import { COMPANY_IMAGES } from '@/lib/media';
+import { useLanguage } from '@/lib/i18n';
 
 interface HeroSectionProps {
   onOpenBooking: () => void;
   onOpenVideo?: () => void;
 }
 
-const HERO_IMAGES = [
+const HERO_IMAGES_AR = [
   {
     src: COMPANY_IMAGES.fieldWorkerBackpack,
     title: 'الفريق الفني بجهة التطبيق الميداني',
-    type: 'صورة رسمية جديدة',
+    type: 'صورة رسمية موثقة',
   },
   {
     src: COMPANY_IMAGES.kitchenTreatment,
     title: 'معالجة صراصير المطابخ بالجل النقطي',
-    type: 'صورة رسمية جديدة',
+    type: 'صورة رسمية موثقة',
   },
   {
     src: COMPANY_IMAGES.residentialInspection,
     title: 'فحص مجهري ومعاينة الشقوق السكنية',
-    type: 'صورة رسمية جديدة',
+    type: 'صورة رسمية موثقة',
   },
   {
     src: COMPANY_IMAGES.fieldTeamAndCertificates,
     title: 'الفريق الفني واعتمادات الضمان',
-    type: 'صورة رسمية جديدة',
+    type: 'صورة رسمية موثقة',
   },
 ];
 
-export default function HeroSection({ onOpenBooking }: HeroSectionProps) {
+const HERO_IMAGES_EN = [
+  {
+    src: COMPANY_IMAGES.fieldWorkerBackpack,
+    title: 'Certified Field Application Team',
+    type: 'Official Field Work',
+  },
+  {
+    src: COMPANY_IMAGES.kitchenTreatment,
+    title: 'Odorless German Gel Treatment',
+    type: 'Official Field Work',
+  },
+  {
+    src: COMPANY_IMAGES.residentialInspection,
+    title: 'Residential Diagnostic Inspection',
+    type: 'Official Field Work',
+  },
+  {
+    src: COMPANY_IMAGES.fieldTeamAndCertificates,
+    title: 'Field Team & Certified Warranties',
+    type: 'Official Field Work',
+  },
+];
+
+export default function HeroSection({ onOpenBooking, onOpenVideo }: HeroSectionProps) {
   const [currentImgIndex, setCurrentImgIndex] = useState(0);
+  const { t, company, isRTL, locale } = useLanguage();
+
+  const heroImages = locale === 'en' ? HERO_IMAGES_EN : HERO_IMAGES_AR;
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setCurrentImgIndex((prev) => (prev + 1) % HERO_IMAGES.length);
+      setCurrentImgIndex((prev) => (prev + 1) % heroImages.length);
     }, 4500);
     return () => clearInterval(timer);
-  }, []);
+  }, [heroImages.length]);
 
   const nextImage = () => {
-    setCurrentImgIndex((prev) => (prev + 1) % HERO_IMAGES.length);
+    setCurrentImgIndex((prev) => (prev + 1) % heroImages.length);
   };
 
   const prevImage = () => {
-    setCurrentImgIndex((prev) => (prev - 1 + HERO_IMAGES.length) % HERO_IMAGES.length);
+    setCurrentImgIndex((prev) => (prev - 1 + heroImages.length) % heroImages.length);
   };
 
-  const currentHeroImg = HERO_IMAGES[currentImgIndex];
+  const currentHeroImg = heroImages[currentImgIndex];
 
   return (
-    <section className="relative bg-[#033F2D] text-white pt-10 pb-20 md:pt-16 md:pb-28 overflow-hidden text-right">
+    <section
+      className={`relative bg-[#033F2D] text-white pt-10 pb-20 md:pt-16 md:pb-28 overflow-hidden ${
+        isRTL ? 'text-right' : 'text-left'
+      }`}
+    >
       {/* Decorative corner background elements */}
       <motion.div
         animate={{ scale: [1, 1.15, 1], opacity: [0.1, 0.18, 0.1] }}
@@ -82,15 +123,15 @@ export default function HeroSection({ onOpenBooking }: HeroSectionProps) {
               className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#C7F268]/15 border border-[#C7F268]/30 text-[#C7F268] text-xs sm:text-sm font-bold tracking-wider"
             >
               <Leaf className="w-4 h-4 text-[#C7F268]" />
-              <span>مكافحة فنية متخصصة في مصر • مبيدات مصرح بها وآمنة</span>
+              <span>{t.heroTopBadge}</span>
             </motion.div>
 
             {/* Main H1 Headline with Text Reveal */}
             <div className="overflow-hidden">
               <TextReveal
                 as="h1"
-                text="المركز الفني المتخصص لمكافحة الحشرات والقوارض"
-                highlightWords={['المتخصص', 'والقوارض']}
+                text={t.heroHeadline}
+                highlightWords={t.heroHighlightWords}
                 className="text-3xl sm:text-4xl md:text-5xl lg:text-5xl font-black text-white leading-[1.3] tracking-tight"
                 delay={0.15}
               />
@@ -103,10 +144,10 @@ export default function HeroSection({ onOpenBooking }: HeroSectionProps) {
               transition={{ duration: 0.7, delay: 0.35, ease: [0.22, 1, 0.36, 1] }}
               className="text-white/85 text-base sm:text-lg leading-relaxed max-w-2xl font-normal"
             >
-              حلول متخصصة لمكافحة الحشرات والقوارض في المنازل والفلل والمنشآت، مع الاهتمام بفحص المشكلة وااختيار طريقة المكافحة المناسبة لكل حالة.
+              {t.heroDesc}
             </motion.p>
 
-            {/* Value Highlights Pill */}
+            {/* Value Highlights */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -115,19 +156,19 @@ export default function HeroSection({ onOpenBooking }: HeroSectionProps) {
             >
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-[#C7F268] shrink-0" />
-                <span>معاملة بدون مغادرة المكان وبدون روائح مزعجة</span>
+                <span>{t.heroBullet1}</span>
               </div>
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-[#C7F268] shrink-0" />
-                <span>استخدام الجل الألماني والأمريكي للمطابخ</span>
+                <span>{t.heroBullet2}</span>
               </div>
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-[#C7F268] shrink-0" />
-                <span>معالجة النمل الأبيض وبق الفراش والقوارض</span>
+                <span>{t.heroBullet3}</span>
               </div>
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-[#C7F268] shrink-0" />
-                <span>خدمة تغطي القاهرة والجيزة وكافة المحافظات</span>
+                <span>{t.heroBullet4}</span>
               </div>
             </motion.div>
 
@@ -141,10 +182,10 @@ export default function HeroSection({ onOpenBooking }: HeroSectionProps) {
               {/* Primary CTA */}
               <button
                 onClick={onOpenBooking}
-                className="btn-default py-3.5 px-7 sm:py-4 sm:px-8 text-sm sm:text-base shadow-lg shadow-[#C7F268]/20 cursor-pointer font-bold inline-flex items-center gap-2"
+                className="bg-[#C7F268] hover:bg-[#b5e050] text-[#033F2D] py-3.5 px-7 sm:py-4 sm:px-8 text-sm sm:text-base rounded-xl shadow-lg shadow-[#C7F268]/20 cursor-pointer font-bold inline-flex items-center gap-2 transition-all hover:scale-[1.02]"
               >
-                <span>اطلب خدمة مكافحة الآن</span>
-                <ArrowLeft className="w-5 h-5 mr-1" />
+                <span>{t.heroCtaOrder}</span>
+                {isRTL ? <ArrowLeft className="w-5 h-5 mr-1" /> : <ArrowRight className="w-5 h-5 ml-1" />}
               </button>
 
               {/* Secondary CTA: WhatsApp */}
@@ -155,8 +196,21 @@ export default function HeroSection({ onOpenBooking }: HeroSectionProps) {
                 className="inline-flex items-center gap-2.5 bg-[#25D366] hover:bg-[#20ba59] text-white font-bold py-3.5 px-6 sm:py-4 sm:px-7 rounded-xl text-sm sm:text-base shadow-lg shadow-[#25D366]/20 transition-all hover:scale-[1.02]"
               >
                 <MessageCircle className="w-5 h-5" />
-                <span>تواصل معنا واتساب</span>
+                <span>{t.heroCtaWhatsapp}</span>
               </a>
+
+              {/* Video CTA */}
+              {onOpenVideo && (
+                <button
+                  onClick={onOpenVideo}
+                  className="inline-flex items-center gap-2.5 bg-white/10 hover:bg-white/20 text-white font-bold py-3.5 px-6 sm:py-4 sm:px-7 rounded-xl text-sm sm:text-base border border-white/20 transition-all hover:border-[#C7F268] cursor-pointer group"
+                >
+                  <span className="w-6 h-6 rounded-full bg-[#C7F268] text-[#033F2D] flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                    <Play className="w-3.5 h-3.5 fill-current" />
+                  </span>
+                  <span>{t.heroCtaVideo}</span>
+                </button>
+              )}
             </motion.div>
 
             {/* Quick Contact Strip */}
@@ -171,8 +225,12 @@ export default function HeroSection({ onOpenBooking }: HeroSectionProps) {
                   <Phone className="w-4 h-4" />
                 </div>
                 <div>
-                  <span className="block text-[11px] text-white/60">الخط المباشر:</span>
-                  <a href={company.phonePrimaryRaw} dir="ltr" className="font-black text-white hover:text-[#C7F268] text-base">
+                  <span className="block text-[11px] text-white/60">{t.heroDirectLine}</span>
+                  <a
+                    href={company.phonePrimaryRaw}
+                    dir="ltr"
+                    className="font-black text-white hover:text-[#C7F268] text-base"
+                  >
                     {company.phonePrimary}
                   </a>
                 </div>
@@ -183,8 +241,12 @@ export default function HeroSection({ onOpenBooking }: HeroSectionProps) {
                   <Phone className="w-4 h-4" />
                 </div>
                 <div>
-                  <span className="block text-[11px] text-white/60">خط ثانٍ:</span>
-                  <a href={company.phoneSecondaryRaw} dir="ltr" className="font-bold text-white/90 hover:text-[#C7F268]">
+                  <span className="block text-[11px] text-white/60">{t.heroSecondaryLine}</span>
+                  <a
+                    href={company.phoneSecondaryRaw}
+                    dir="ltr"
+                    className="font-bold text-white/90 hover:text-[#C7F268]"
+                  >
                     {company.phoneSecondary}
                   </a>
                 </div>
@@ -192,7 +254,7 @@ export default function HeroSection({ onOpenBooking }: HeroSectionProps) {
             </motion.div>
           </div>
 
-          {/* Right Hero Image (5 cols) - Showcase both new & classic images */}
+          {/* Right Hero Image (5 cols) */}
           <div className="lg:col-span-5 relative flex flex-col items-center">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
@@ -201,7 +263,7 @@ export default function HeroSection({ onOpenBooking }: HeroSectionProps) {
               className="relative w-full max-w-md lg:max-w-none aspect-[4/5] flex items-center justify-center"
             >
               <div className="absolute inset-4 rounded-3xl bg-gradient-to-tr from-[#C7F268]/20 to-transparent border border-white/10 rotate-2" />
-              
+
               {/* Main Displayed Image with Animation */}
               <div className="relative w-full h-full rounded-3xl overflow-hidden shadow-2xl border-4 border-white/20 bg-emerald-950">
                 <AnimatePresence mode="wait">
@@ -225,25 +287,33 @@ export default function HeroSection({ onOpenBooking }: HeroSectionProps) {
                 </AnimatePresence>
 
                 {/* Slider controls overlay */}
-                <div className="absolute top-4 left-4 z-20 flex items-center gap-2">
+                <div
+                  className={`absolute top-4 ${
+                    isRTL ? 'left-4' : 'right-4'
+                  } z-20 flex items-center gap-2`}
+                >
                   <button
                     onClick={prevImage}
                     className="w-8 h-8 rounded-full bg-black/50 text-white hover:bg-black/80 flex items-center justify-center transition-all cursor-pointer"
-                    aria-label="الصورة السابقة"
+                    aria-label="Previous image"
                   >
-                    <ChevronRight className="w-4 h-4" />
+                    {isRTL ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
                   </button>
                   <button
                     onClick={nextImage}
                     className="w-8 h-8 rounded-full bg-black/50 text-white hover:bg-black/80 flex items-center justify-center transition-all cursor-pointer"
-                    aria-label="الصورة التالية"
+                    aria-label="Next image"
                   >
-                    <ChevronLeft className="w-4 h-4" />
+                    {isRTL ? <ChevronLeft className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
                   </button>
                 </div>
 
                 {/* Top Badge on image */}
-                <div className="absolute top-4 right-4 z-20 px-3 py-1 rounded-full bg-black/60 backdrop-blur-md text-[#C7F268] text-xs font-bold border border-white/20">
+                <div
+                  className={`absolute top-4 ${
+                    isRTL ? 'right-4' : 'left-4'
+                  } z-20 px-3 py-1 rounded-full bg-black/60 backdrop-blur-md text-[#C7F268] text-xs font-bold border border-white/20`}
+                >
                   {currentHeroImg.type}
                 </div>
               </div>
@@ -252,7 +322,9 @@ export default function HeroSection({ onOpenBooking }: HeroSectionProps) {
               <motion.div
                 animate={{ y: [0, -6, 0] }}
                 transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-                className="absolute bottom-4 right-2 sm:-right-4 z-20 bg-white text-[#033F2D] p-3.5 rounded-2xl shadow-2xl border border-gray-100 flex items-center gap-3 text-right max-w-[280px]"
+                className={`absolute bottom-4 ${
+                  isRTL ? 'right-2 sm:-right-4 text-right' : 'left-2 sm:-left-4 text-left'
+                } z-20 bg-white text-[#033F2D] p-3.5 rounded-2xl shadow-2xl border border-gray-100 flex items-center gap-3 max-w-[280px]`}
               >
                 <div className="w-10 h-10 rounded-xl bg-[#033F2D] text-[#C7F268] flex items-center justify-center shrink-0">
                   <ShieldCheck className="w-6 h-6 stroke-[2.5]" />
@@ -261,14 +333,14 @@ export default function HeroSection({ onOpenBooking }: HeroSectionProps) {
                   <span className="text-[10px] uppercase font-extrabold tracking-wider text-[#484C44] block">
                     {currentHeroImg.title}
                   </span>
-                  <p className="text-xs font-black text-[#033F2D]">مبيدات معتمدة وبدون رائحة</p>
+                  <p className="text-xs font-black text-[#033F2D]">{t.heroVerifiedBadgeDesc}</p>
                 </div>
               </motion.div>
             </motion.div>
 
             {/* Thumbnail Navigation Row */}
             <div className="flex items-center justify-center gap-2 mt-4 z-20">
-              {HERO_IMAGES.map((img, idx) => (
+              {heroImages.map((img, idx) => (
                 <button
                   key={idx}
                   onClick={() => setCurrentImgIndex(idx)}
@@ -288,4 +360,3 @@ export default function HeroSection({ onOpenBooking }: HeroSectionProps) {
     </section>
   );
 }
-

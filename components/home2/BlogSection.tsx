@@ -2,40 +2,49 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { Calendar, User, ArrowLeft } from 'lucide-react';
-import { BLOG_POSTS } from '@/lib/siteData';
+import { Calendar, User, ArrowLeft, ArrowRight } from 'lucide-react';
 import TextReveal from '@/components/animations/TextReveal';
 import ScrollReveal from '@/components/animations/ScrollReveal';
 import StaggerContainer, { StaggerItem } from '@/components/animations/StaggerContainer';
+import { useLanguage } from '@/lib/i18n';
 
 export default function BlogSection() {
+  const { t, siteData, isRTL, locale } = useLanguage();
+
   return (
-    <section className="py-20 lg:py-28 bg-[#FFFFFF] relative overflow-hidden text-right">
+    <section
+      className={`py-20 lg:py-28 bg-[#FFFFFF] relative overflow-hidden ${
+        isRTL ? 'text-right' : 'text-left'
+      }`}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16">
           <div className="max-w-2xl space-y-3">
             <ScrollReveal direction="down" duration={0.6}>
               <div className="section-subtitle">
-                <span>أحدث مقالات المدونة</span>
+                <span>{t.blogSubtitle}</span>
               </div>
             </ScrollReveal>
 
             <div>
               <TextReveal
                 as="h2"
-                text="ابقَ على اطلاع دائم مع مدونتنا ونصائحنا الوقائية"
-                highlightWords={['مدونتنا', 'ونصائحنا']}
+                text={t.blogHeadline}
+                highlightWords={t.blogHighlightWords}
                 highlightClass="text-[#033F2D] underline decoration-[#C7F268] decoration-4 underline-offset-4"
                 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#033F2D] leading-[1.25]"
               />
             </div>
           </div>
 
-          <ScrollReveal direction="right" delay={0.2} duration={0.6}>
-            <Link href="/blog" className="btn-default py-3.5 px-7">
-              <span>عرض كل المقالات</span>
-              <ArrowLeft className="w-4 h-4 mr-2" />
+          <ScrollReveal direction={isRTL ? 'right' : 'left'} delay={0.2} duration={0.6}>
+            <Link
+              href="/blog"
+              className="btn-default py-3.5 px-7 inline-flex items-center gap-2"
+            >
+              <span>{t.blogViewAll}</span>
+              {isRTL ? <ArrowLeft className="w-4 h-4 mr-1" /> : <ArrowRight className="w-4 h-4 ml-1" />}
             </Link>
           </ScrollReveal>
         </div>
@@ -45,10 +54,12 @@ export default function BlogSection() {
           staggerDelay={0.15}
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
         >
-          {BLOG_POSTS.slice(0, 3).map((post) => (
+          {siteData.blogPosts.slice(0, 3).map((post) => (
             <StaggerItem key={post.id} yOffset={35}>
               <article
-                className="group bg-[#F6F8F5] rounded-3xl overflow-hidden border border-gray-100 hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between h-full text-right"
+                className={`group bg-[#F6F8F5] rounded-3xl overflow-hidden border border-gray-100 hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between h-full ${
+                  isRTL ? 'text-right' : 'text-left'
+                }`}
               >
                 {/* Image & Date Badge */}
                 <div className="relative aspect-[16/10] overflow-hidden bg-gray-200">
@@ -59,7 +70,11 @@ export default function BlogSection() {
                     className="object-cover group-hover:scale-105 transition-transform duration-500"
                     referrerPolicy="no-referrer"
                   />
-                  <div className="absolute top-4 right-4 bg-[#C7F268] text-[#033F2D] px-3 py-1 rounded-full text-xs font-bold shadow-md">
+                  <div
+                    className={`absolute top-4 ${
+                      isRTL ? 'right-4' : 'left-4'
+                    } bg-[#C7F268] text-[#033F2D] px-3 py-1 rounded-full text-xs font-bold shadow-md`}
+                  >
                     {post.category}
                   </div>
                 </div>
@@ -75,7 +90,7 @@ export default function BlogSection() {
                       <span>•</span>
                       <span className="flex items-center gap-1.5">
                         <User className="w-3.5 h-3.5 text-[#033F2D]" />
-                        بواسطة {post.author}
+                        {locale === 'en' ? `By ${post.author}` : `بواسطة ${post.author}`}
                       </span>
                     </div>
 
@@ -93,9 +108,19 @@ export default function BlogSection() {
                       href={`/blog/${post.slug}`}
                       className="inline-flex items-center gap-2 text-sm font-bold text-[#033F2D] hover:text-[#02271c] group/link"
                     >
-                      <span>اقرأ المقال بالكامل</span>
-                      <div className="w-7 h-7 rounded-full bg-[#C7F268] text-[#033F2D] flex items-center justify-center group-hover/link:-translate-x-1 transition-transform">
-                        <ArrowLeft className="w-3.5 h-3.5 stroke-[2.5]" />
+                      <span>{t.blogReadArticle}</span>
+                      <div
+                        className={`w-7 h-7 rounded-full bg-[#C7F268] text-[#033F2D] flex items-center justify-center transition-transform ${
+                          isRTL
+                            ? 'group-hover/link:-translate-x-1'
+                            : 'group-hover/link:translate-x-1'
+                        }`}
+                      >
+                        {isRTL ? (
+                          <ArrowLeft className="w-3.5 h-3.5 stroke-[2.5]" />
+                        ) : (
+                          <ArrowRight className="w-3.5 h-3.5 stroke-[2.5]" />
+                        )}
                       </div>
                     </Link>
                   </div>

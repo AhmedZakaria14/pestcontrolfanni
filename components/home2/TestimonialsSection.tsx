@@ -2,63 +2,81 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Star, ChevronLeft, ChevronRight, Quote, ArrowLeft, User } from 'lucide-react';
-import { TESTIMONIALS_DATA } from '@/lib/siteData';
+import { Star, ChevronLeft, ChevronRight, Quote, ArrowLeft, ArrowRight, User } from 'lucide-react';
 import TextReveal from '@/components/animations/TextReveal';
 import ScrollReveal from '@/components/animations/ScrollReveal';
 import { motion, AnimatePresence } from 'motion/react';
+import { useLanguage } from '@/lib/i18n';
 
 export default function TestimonialsSection() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState(1);
+  const { t, siteData, isRTL } = useLanguage();
+
+  const testimonials = siteData.testimonials;
 
   const prev = () => {
     setDirection(-1);
-    setCurrentIndex((p) => (p === 0 ? TESTIMONIALS_DATA.length - 1 : p - 1));
+    setCurrentIndex((p) => (p === 0 ? testimonials.length - 1 : p - 1));
   };
 
   const next = () => {
     setDirection(1);
-    setCurrentIndex((p) => (p === TESTIMONIALS_DATA.length - 1 ? 0 : p + 1));
+    setCurrentIndex((p) => (p === testimonials.length - 1 ? 0 : p + 1));
   };
 
-  const current = TESTIMONIALS_DATA[currentIndex];
+  const current = testimonials[currentIndex] || testimonials[0];
 
   return (
-    <section className="py-20 lg:py-28 bg-[#F6F8F5] relative overflow-hidden text-right">
+    <section
+      className={`py-20 lg:py-28 bg-[#F6F8F5] relative overflow-hidden ${
+        isRTL ? 'text-right' : 'text-left'
+      }`}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16">
           <div className="max-w-2xl space-y-3">
             <ScrollReveal direction="down" duration={0.6}>
               <div className="section-subtitle">
-                <span>آراء وتجارب العملاء</span>
+                <span>{t.testimonialsSubtitle}</span>
               </div>
             </ScrollReveal>
 
             <div>
               <TextReveal
                 as="h2"
-                text="تجارب حقيقية لعملاء وثقوا في خدمات المركز"
-                highlightWords={['تجارب', 'حقيقية']}
+                text={t.testimonialsHeadline}
+                highlightWords={t.testimonialsHighlightWords}
                 highlightClass="text-[#033F2D] underline decoration-[#C7F268] decoration-4 underline-offset-4"
                 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#033F2D] leading-[1.25]"
               />
             </div>
           </div>
 
-          <ScrollReveal direction="right" delay={0.2} duration={0.6}>
-            <Link href="/testimonials" className="btn-default py-3.5 px-7">
-              <span>عرض كافة الآراء</span>
-              <ArrowLeft className="w-4 h-4 mr-2" />
+          <ScrollReveal direction={isRTL ? 'right' : 'left'} delay={0.2} duration={0.6}>
+            <Link
+              href="/testimonials"
+              className="btn-default py-3.5 px-7 inline-flex items-center gap-2"
+            >
+              <span>{t.testimonialsViewAll}</span>
+              {isRTL ? <ArrowLeft className="w-4 h-4 mr-1" /> : <ArrowRight className="w-4 h-4 ml-1" />}
             </Link>
           </ScrollReveal>
         </div>
 
         {/* Testimonials Carousel Card */}
         <ScrollReveal direction="up" duration={0.8} distance={30}>
-          <div className="bg-white rounded-3xl p-8 sm:p-12 shadow-xl border border-gray-100 max-w-4xl mx-auto relative overflow-hidden text-right">
-            <Quote className="w-16 h-16 text-[#C7F268] absolute top-8 left-8 opacity-40 pointer-events-none scale-x-[-1]" />
+          <div
+            className={`bg-white rounded-3xl p-8 sm:p-12 shadow-xl border border-gray-100 max-w-4xl mx-auto relative overflow-hidden ${
+              isRTL ? 'text-right' : 'text-left'
+            }`}
+          >
+            <Quote
+              className={`w-16 h-16 text-[#C7F268] absolute top-8 ${
+                isRTL ? 'left-8 scale-x-[-1]' : 'right-8'
+              } opacity-40 pointer-events-none`}
+            />
 
             <div className="relative z-10 min-h-[220px] flex flex-col justify-between">
               <AnimatePresence mode="wait">
@@ -96,24 +114,24 @@ export default function TestimonialsSection() {
                       </div>
                     </div>
 
-                    {/* Prev / Next controls in RTL */}
+                    {/* Prev / Next controls */}
                     <div className="flex items-center gap-3">
                       <button
-                        onClick={prev}
+                        onClick={isRTL ? prev : prev}
                         className="w-10 h-10 rounded-full border border-gray-200 hover:bg-[#033F2D] hover:text-[#C7F268] hover:border-[#033F2D] flex items-center justify-center transition-colors cursor-pointer"
-                        aria-label="التقييم السابق"
+                        aria-label="Previous review"
                       >
-                        <ChevronRight className="w-5 h-5" />
+                        {isRTL ? <ChevronRight className="w-5 h-5" /> : <ChevronLeft className="w-5 h-5" />}
                       </button>
                       <span className="text-xs font-bold text-gray-400" dir="ltr">
-                        {currentIndex + 1} / {TESTIMONIALS_DATA.length}
+                        {currentIndex + 1} / {testimonials.length}
                       </span>
                       <button
-                        onClick={next}
+                        onClick={isRTL ? next : next}
                         className="w-10 h-10 rounded-full border border-gray-200 hover:bg-[#033F2D] hover:text-[#C7F268] hover:border-[#033F2D] flex items-center justify-center transition-colors cursor-pointer"
-                        aria-label="التقييم التالي"
+                        aria-label="Next review"
                       >
-                        <ChevronLeft className="w-5 h-5" />
+                        {isRTL ? <ChevronLeft className="w-5 h-5" /> : <ChevronRight className="w-5 h-5" />}
                       </button>
                     </div>
                   </div>

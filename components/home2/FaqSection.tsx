@@ -3,31 +3,35 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Plus, Minus, ArrowLeft, Phone, MessageCircle } from 'lucide-react';
-import { FAQS_DATA } from '@/lib/siteData';
+import { Plus, Minus, ArrowLeft, ArrowRight, Phone, MessageCircle } from 'lucide-react';
 import TextReveal from '@/components/animations/TextReveal';
 import ScrollReveal from '@/components/animations/ScrollReveal';
 import { motion, AnimatePresence } from 'motion/react';
-import { company } from '@/lib/company';
+import { useLanguage } from '@/lib/i18n';
 
 export default function FaqSection() {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
+  const { t, company, siteData, isRTL, locale } = useLanguage();
 
   const toggle = (i: number) => {
     setOpenIndex(openIndex === i ? null : i);
   };
 
   return (
-    <section className="py-20 lg:py-28 bg-[#F6F8F5] relative overflow-hidden text-right">
+    <section
+      className={`py-20 lg:py-28 bg-[#F6F8F5] relative overflow-hidden ${
+        isRTL ? 'text-right' : 'text-left'
+      }`}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
           {/* Visual Card with Image & Contact Box (5 cols) */}
           <div className="lg:col-span-5 space-y-6">
-            <ScrollReveal direction="left" duration={0.8}>
+            <ScrollReveal direction={isRTL ? 'left' : 'right'} duration={0.8}>
               <div className="relative rounded-3xl overflow-hidden shadow-2xl aspect-[4/5] group">
                 <Image
                   src="/assets/company/img7_1_19_22.jpg"
-                  alt="الأسئلة الشائعة وإرشادات المكافحة"
+                  alt={locale === 'en' ? 'Pest control FAQs and guidelines' : 'الأسئلة الشائعة وإرشادات المكافحة'}
                   fill
                   className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
                   referrerPolicy="no-referrer"
@@ -37,11 +41,15 @@ export default function FaqSection() {
                 <motion.div
                   animate={{ y: [0, -6, 0] }}
                   transition={{ duration: 4.5, repeat: Infinity, ease: 'easeInOut' }}
-                  className="absolute bottom-6 left-6 right-6 bg-[#033F2D] text-white p-5 rounded-2xl shadow-2xl border border-white/10 space-y-2.5 text-right"
+                  className={`absolute bottom-6 left-6 right-6 bg-[#033F2D] text-white p-5 rounded-2xl shadow-2xl border border-white/10 space-y-2.5 ${
+                    isRTL ? 'text-right' : 'text-left'
+                  }`}
                 >
-                  <span className="text-xs font-bold text-[#C7F268] block">هل لديك استفسار محدد؟</span>
+                  <span className="text-xs font-bold text-[#C7F268] block">
+                    {t.faqsBoxPrompt}
+                  </span>
                   <p className="text-sm font-black text-white leading-snug">
-                    تواصل مباشرة مع المهندس الفني للحصول على إجابة وافية لحالتك.
+                    {t.faqsBoxDesc}
                   </p>
                   <div className="pt-1 flex items-center gap-2">
                     <a
@@ -59,7 +67,7 @@ export default function FaqSection() {
                       className="inline-flex items-center gap-1.5 bg-[#25D366] text-white px-3 py-1.5 rounded-lg text-xs font-bold"
                     >
                       <MessageCircle className="w-3.5 h-3.5" />
-                      <span>واتساب</span>
+                      <span>{t.whatsappNow}</span>
                     </a>
                   </div>
                 </motion.div>
@@ -67,9 +75,9 @@ export default function FaqSection() {
             </ScrollReveal>
 
             <ScrollReveal direction="up" delay={0.2} duration={0.6} className="pt-2">
-              <Link href="/faqs" className="btn-default py-3 px-6 text-sm">
-                <span>عرض كافة الأسئلة</span>
-                <ArrowLeft className="w-4 h-4 mr-2" />
+              <Link href="/faqs" className="btn-default py-3 px-6 text-sm inline-flex items-center gap-2">
+                <span>{t.faqsViewAll}</span>
+                {isRTL ? <ArrowLeft className="w-4 h-4 mr-1" /> : <ArrowRight className="w-4 h-4 ml-1" />}
               </Link>
             </ScrollReveal>
           </div>
@@ -78,15 +86,15 @@ export default function FaqSection() {
           <div className="lg:col-span-7 space-y-6">
             <ScrollReveal direction="down" duration={0.6}>
               <div className="section-subtitle">
-                <span>الأسئلة الشائعة وإجاباتها</span>
+                <span>{t.faqsSubtitle}</span>
               </div>
             </ScrollReveal>
 
             <div>
               <TextReveal
                 as="h2"
-                text="إجابات واضحة وموثوقة حول خدمات المكافحة والسلامة"
-                highlightWords={['واضحة', 'وموثوقة']}
+                text={t.faqsHeadline}
+                highlightWords={t.faqsHighlightWords}
                 highlightClass="text-[#033F2D] underline decoration-[#C7F268] decoration-4 underline-offset-4"
                 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#033F2D] leading-[1.25]"
               />
@@ -94,17 +102,17 @@ export default function FaqSection() {
 
             {/* Accordion Items */}
             <div className="space-y-4 pt-4">
-              {FAQS_DATA.slice(0, 5).map((faq, idx) => {
+              {siteData.faqs.slice(0, 5).map((faq, idx) => {
                 const isOpen = openIndex === idx;
 
                 return (
                   <ScrollReveal key={faq.id} direction="up" delay={idx * 0.08} duration={0.5}>
-                    <div
-                      className="bg-white rounded-2xl border border-gray-200/80 overflow-hidden transition-all duration-200 shadow-sm"
-                    >
+                    <div className="bg-white rounded-2xl border border-gray-200/80 overflow-hidden transition-all duration-200 shadow-sm">
                       <button
                         onClick={() => toggle(idx)}
-                        className="w-full p-5 sm:p-6 text-right flex items-center justify-between gap-4 font-bold text-base sm:text-lg text-[#033F2D] hover:text-[#022a1e] transition-colors cursor-pointer"
+                        className={`w-full p-5 sm:p-6 ${
+                          isRTL ? 'text-right' : 'text-left'
+                        } flex items-center justify-between gap-4 font-bold text-base sm:text-lg text-[#033F2D] hover:text-[#022a1e] transition-colors cursor-pointer`}
                       >
                         <span>{faq.question}</span>
                         <div

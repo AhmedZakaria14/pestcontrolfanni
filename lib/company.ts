@@ -1,21 +1,61 @@
-export const company = {
-  name: "المركز الفني المتخصص لمكافحة الحشرات",
-  shortName: "المركز الفني المتخصص",
-  tagline: "المركز الفني المتخصص لمكافحة الحشرات والقوارض في مصر",
-  description: "حلول متخصصة لمكافحة الحشرات والقوارض في المنازل والفلل والمنشآت، مع الاهتمام بفحص المشكلة واختيار طريقة المكافحة المناسبة لكل حالة.",
-  country: "Egypt",
-  countryArabic: "جمهورية مصر العربية",
-  phonePrimary: "01000989063",
-  phoneSecondary: "01000989064",
-  whatsapp: "01033314613",
-  whatsappUrl: "https://wa.me/201033314613",
-  phonePrimaryRaw: "tel:01000989063",
-  phoneSecondaryRaw: "tel:01000989064",
-  language: "ar-EG",
-  direction: "rtl" as const,
-  coverage: "خدمة تغطي القاهرة الكبرى، الجيزة، وجميع محافظات جمهورية مصر العربية",
-  workingHours: "خدمة واستجابة سريعة على مدار 24 ساعة طوال أيام الأسبوع",
-  establishedNotice: "فريق فني متخصص بأحدث أجهزة ومبيدات المكافحة المصرح بها",
+export interface CompanyInfo {
+  name: string;
+  shortName: string;
+  tagline: string;
+  description: string;
+  country: string;
+  countryArabic: string;
+  phonePrimary: string;
+  phonePrimaryRaw: string;
+  phoneSecondary: string;
+  phoneSecondaryRaw: string;
+  whatsapp: string;
+  whatsappNumber: string;
+  whatsappUrl: string;
+  workingHours: string;
+  coverage: string;
+}
+
+export const COMPANY_AR: CompanyInfo = {
+  name: 'المركز الفني المتخصص لمكافحة الحشرات والقوارض',
+  shortName: 'المركز الفني المتخصص',
+  tagline: 'لمكافحة الحشرات والقوارض',
+  description:
+    'حلول متخصصة لمكافحة الحشرات والقوارض في المنازل والفلل والمنشآت داخل جمهورية مصر العربية، مع الاهتمام بفحص المشكلة واختيار طريقة المكافحة الآمنة والفعالة لكل حالة.',
+  country: 'مصر',
+  countryArabic: 'جمهورية مصر العربية',
+  phonePrimary: '01000989063',
+  phonePrimaryRaw: 'tel:01000989063',
+  phoneSecondary: '01014402627',
+  phoneSecondaryRaw: 'tel:01014402627',
+  whatsapp: '01000989063',
+  whatsappNumber: '201000989063',
+  whatsappUrl: 'https://wa.me/201000989063',
+  workingHours: 'خدمة متواصلة يومياً لتلقي طلبات المعاينة والمكافحة',
+  coverage: 'تغطية شاملة للقاهرة الكبرى والجيزة ومحافظات جمهورية مصر العربية',
 };
 
-export default company;
+export const COMPANY_EN: CompanyInfo = {
+  name: 'Specialized Technical Center for Pest & Rodent Control',
+  shortName: 'Specialized Technical Center',
+  tagline: 'For Pest & Rodent Control',
+  description:
+    'Specialized pest and rodent control solutions for homes, villas, and commercial facilities across Egypt, with thorough technical inspection and safe, odorless treatment tailored to every case.',
+  country: 'Egypt',
+  countryArabic: 'Arab Republic of Egypt',
+  phonePrimary: '01000989063',
+  phonePrimaryRaw: 'tel:01000989063',
+  phoneSecondary: '01014402627',
+  phoneSecondaryRaw: 'tel:01014402627',
+  whatsapp: '01000989063',
+  whatsappNumber: '201000989063',
+  whatsappUrl: 'https://wa.me/201000989063',
+  workingHours: 'Daily 24/7 service for inspection & pest control requests',
+  coverage: 'Full coverage across Greater Cairo, Giza, and all governorates of Egypt',
+};
+
+export const company = COMPANY_AR;
+
+export function getCompanyByLocale(locale: 'ar' | 'en'): CompanyInfo {
+  return locale === 'en' ? COMPANY_EN : COMPANY_AR;
+}
