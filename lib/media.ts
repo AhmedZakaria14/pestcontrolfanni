@@ -37,6 +37,8 @@ export const PEST_IMAGES = {
   mosquito: '/images/pests/mosquito.jpg',
   waspHornet: '/images/pests/wasp-hornet.jpg',
   pantryBeetle: '/images/pests/pantry-beetle.jpg',
+  woodBorer: '/images/pests/wood-borer.jpg',
+  gecko: '/images/pests/gecko.jpg',
 };
 
 export default COMPANY_IMAGES;

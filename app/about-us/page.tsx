@@ -51,9 +51,9 @@ export default function AboutUsPage() {
             >
               <div className="p-5 rounded-2xl bg-white/5 border border-white/10 space-y-2">
                 <ShieldCheck className="w-8 h-8 text-[#C7F268]" />
-                <h4 className="text-base font-bold text-white">
+                <h3 className="text-base font-bold text-white">
                   {locale === 'en' ? 'Certified Odorless Formulations' : 'مبيدات معتمدة ومصرحة'}
-                </h4>
+                </h3>
                 <p className="text-xs text-white/70 leading-relaxed">
                   {locale === 'en'
                     ? 'Official eco-compliant compounds safe for kitchens, children, and pets.'
@@ -63,9 +63,9 @@ export default function AboutUsPage() {
 
               <div className="p-5 rounded-2xl bg-white/5 border border-white/10 space-y-2">
                 <CheckCircle2 className="w-8 h-8 text-[#C7F268]" />
-                <h4 className="text-base font-bold text-white">
+                <h3 className="text-base font-bold text-white">
                   {locale === 'en' ? 'No Need to Vacate Property' : 'بدون مغادرة المنزل'}
-                </h4>
+                </h3>
                 <p className="text-xs text-white/70 leading-relaxed">
                   {locale === 'en'
                     ? 'Targeted spot-gel injection with zero disturbance to your daily household routine.'
@@ -75,9 +75,9 @@ export default function AboutUsPage() {
 
               <div className="p-5 rounded-2xl bg-white/5 border border-white/10 space-y-2">
                 <Users className="w-8 h-8 text-[#C7F268]" />
-                <h4 className="text-base font-bold text-white">
+                <h3 className="text-base font-bold text-white">
                   {locale === 'en' ? 'Experienced Certified Engineers' : 'فريق فني متمرس'}
-                </h4>
+                </h3>
                 <p className="text-xs text-white/70 leading-relaxed">
                   {locale === 'en'
                     ? 'Engineers trained in pest life cycles, bed bug detection, and termite colony eradication.'
@@ -87,9 +87,9 @@ export default function AboutUsPage() {
 
               <div className="p-5 rounded-2xl bg-white/5 border border-white/10 space-y-2">
                 <Award className="w-8 h-8 text-[#C7F268]" />
-                <h4 className="text-base font-bold text-white">
+                <h3 className="text-base font-bold text-white">
                   {locale === 'en' ? 'Egypt-Wide Coverage' : 'تغطية محافظات مصر'}
-                </h4>
+                </h3>
                 <p className="text-xs text-white/70 leading-relaxed">
                   {locale === 'en'
                     ? 'Rapid response teams serving Greater Cairo, Giza, and all Egyptian governorates.'

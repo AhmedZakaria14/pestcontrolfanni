@@ -74,7 +74,7 @@ export default function ImageGalleryPage() {
                     <span className="text-xs uppercase font-bold text-[#C7F268] mb-1">
                       {item.category}
                     </span>
-                    <h4 className="text-base font-bold leading-snug">{item.title}</h4>
+                    <h3 className="text-base font-bold leading-snug">{item.title}</h3>
                     <div className="absolute top-6 left-6 w-10 h-10 rounded-full bg-[#C7F268] text-[#033F2D] flex items-center justify-center">
                       <ZoomIn className="w-5 h-5" />
                     </div>
@@ -119,7 +119,7 @@ export default function ImageGalleryPage() {
                 <span className="text-xs font-bold text-[#C7F268] uppercase">
                   {lightboxItem.category}
                 </span>
-                <h4 className="text-lg font-bold">{lightboxItem.title}</h4>
+                <h3 className="text-lg font-bold">{lightboxItem.title}</h3>
               </div>
             </div>
           </div>
