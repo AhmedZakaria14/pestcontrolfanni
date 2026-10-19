@@ -9,6 +9,7 @@ import JsonLd from '@/components/JsonLd';
 import { COMPANY_IMAGES } from '@/lib/media';
 import { getLocalBusinessObject } from '@/lib/schema';
 import { LanguageProvider } from '@/lib/i18n';
+import FloatingContactDock from '@/components/FloatingContactDock';
 
 const cairo = Cairo({
   subsets: ['arabic', 'latin'],
@@ -103,6 +104,7 @@ export default function RootLayout({
           <MagicCursor />
           {children}
           <BackToTop />
+          <FloatingContactDock />
         </LanguageProvider>
       </body>
     </html>
