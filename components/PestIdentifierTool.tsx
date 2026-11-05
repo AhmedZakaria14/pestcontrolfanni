@@ -466,14 +466,12 @@ export default function PestIdentifierTool() {
                             <span>{company.phonePrimary}</span>
                           </a>
 
-                          <a
-                            href={company.whatsappUrl}
-                            target="_blank"
-                            rel="noreferrer"
+                          <button
+                            onClick={() => handleOpenBookingForPest(topMatch.pest)}
                             className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-[#25D366] hover:bg-[#20ba59] text-white font-bold text-sm transition-colors cursor-pointer"
                           >
                             <span>{t.whatsappNow}</span>
-                          </a>
+                          </button>
 
                           <Link
                             href={`/services/${topMatch.pest.recommendedServiceSlug}`}

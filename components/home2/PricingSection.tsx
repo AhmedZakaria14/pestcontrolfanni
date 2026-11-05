@@ -154,15 +154,9 @@ export default function PricingSection({ onOpenBooking }: PricingSectionProps) {
                       <span>{t.pricingRequestBtn}</span>
                       {isRTL ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
                     </button>
-                    <a
-                      href={`${company.whatsappUrl}?text=${encodeURIComponent(
-                        locale === 'en'
-                          ? `Hello, I would like to inquire about ${plan.name}`
-                          : `مرحباً، أود الاستفسار عن تفاصيل وتكلفة ${plan.name}`
-                      )}`}
-                      target="_blank"
-                      rel="noreferrer"
-                      className={`w-full py-2.5 px-4 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-colors ${
+                    <button
+                      onClick={onOpenBooking}
+                      className={`w-full py-2.5 px-4 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-colors cursor-pointer ${
                         isPop
                           ? 'bg-white/10 hover:bg-white/20 text-white'
                           : 'bg-gray-200/70 hover:bg-gray-300 text-gray-800'
@@ -170,7 +164,7 @@ export default function PricingSection({ onOpenBooking }: PricingSectionProps) {
                     >
                       <MessageCircle className="w-3.5 h-3.5" />
                       <span>{t.whatsappNow}</span>
-                    </a>
+                    </button>
                   </div>
                 </div>
               </StaggerItem>

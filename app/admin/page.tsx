@@ -160,6 +160,8 @@ export default function AdminDashboardPage() {
   useEffect(() => {
     if (!isAuthenticated) return;
 
+    loadAllData();
+
     const unsubscribeBookings = subscribeToBookings(
       (bData) => {
         setBookings(bData);

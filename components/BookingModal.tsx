@@ -111,27 +111,14 @@ export default function BookingModal({
               <p className="text-[#484C44] max-w-md mx-auto text-sm leading-relaxed">
                 {t.bookingSuccessDesc(formData.name, formData.phone)}
               </p>
-              <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
-                <a
-                  href={`${company.whatsappUrl}?text=${encodeURIComponent(
-                    locale === 'en'
-                      ? `Hello, I am ${formData.name}, confirming my request for ${formData.service}`
-                      : `مرحباً، أنا ${formData.name}، أود تأكيد طلبي لخدمة ${formData.service}`
-                  )}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center gap-2 bg-[#25D366] text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-[#20ba59] transition-colors"
-                >
-                  <MessageCircle className="w-4 h-4" />
-                  <span>{t.bookingOpenWhatsappBtn}</span>
-                </a>
+              <div className="pt-2 flex items-center justify-center">
                 <button
                   type="button"
                   onClick={() => {
                     setSubmitted(false);
                     onClose();
                   }}
-                  className="px-5 py-2.5 rounded-xl bg-gray-100 text-gray-700 font-bold text-sm hover:bg-gray-200 transition-colors cursor-pointer"
+                  className="px-6 py-2.5 rounded-xl bg-[#C7F268] text-[#033F2D] font-bold text-sm hover:bg-[#b5e050] transition-colors cursor-pointer"
                 >
                   {t.bookingCloseBtn}
                 </button>
