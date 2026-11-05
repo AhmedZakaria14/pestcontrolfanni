@@ -370,7 +370,7 @@ export default function AdminDashboardPage() {
               البريد الإلكتروني للأدمن
               <input type="email" required autoComplete="username" value={emailInput}
                 onChange={(e) => setEmailInput(e.target.value)} dir="ltr"
-                className="mt-1.5 w-full rounded-xl border border-white/20 bg-white/10 px-4 py-3 text-sm text-white" />
+                className="mt-1.5 w-full rounded-xl border border-white/20 bg-white/10 px-4 py-3 text-base sm:text-sm text-white" />
             </label>
             <div>
               <label className="block text-xs font-bold text-[#C7F268] mb-1.5">
@@ -383,7 +383,7 @@ export default function AdminDashboardPage() {
                 placeholder="أدخل كلمة مرور لوحة التحكم..."
                 value={passwordInput}
                 onChange={(e) => setPasswordInput(e.target.value)}
-                className="w-full bg-white/10 text-white placeholder-white/40 text-sm px-4 py-3 rounded-xl border border-white/20 focus:outline-none focus:border-[#C7F268] transition-colors"
+                className="w-full bg-white/10 text-white placeholder-white/40 text-base sm:text-sm px-4 py-3 rounded-xl border border-white/20 focus:outline-none focus:border-[#C7F268] transition-colors"
                 dir="ltr"
               />
             </div>
@@ -418,14 +418,14 @@ export default function AdminDashboardPage() {
     <div className="min-h-screen bg-[#F6F8F5] text-[#033F2D] flex flex-col" dir={isRTL ? 'rtl' : 'ltr'}>
       {/* Toast Notification */}
       {notification && (
-        <div className="fixed top-5 left-1/2 -translate-x-1/2 z-[9999] px-6 py-3 rounded-2xl bg-[#033F2D] text-[#C7F268] text-sm font-black shadow-2xl border-2 border-[#C7F268] flex items-center gap-2 animate-in fade-in slide-in-from-top-4">
+        <div className="fixed top-5 left-1/2 -translate-x-1/2 z-[10000] w-max max-w-[calc(100%_-_1.5rem)] px-6 py-3 rounded-2xl bg-[#033F2D] text-[#C7F268] text-sm font-black shadow-2xl border-2 border-[#C7F268] flex items-center gap-2 animate-in fade-in slide-in-from-top-4">
           <CheckCircle2 className="w-5 h-5" />
           <span>{notification}</span>
         </div>
       )}
 
       {/* Top Navbar */}
-      <header className="sticky top-0 z-40 bg-[#033F2D] text-white border-b border-white/10 shadow-lg px-4 sm:px-8 py-3.5 flex items-center justify-between">
+      <header className="sticky top-0 z-40 bg-[#033F2D] text-white border-b border-white/10 shadow-lg px-3 sm:px-8 py-2 sm:py-3.5 flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-4">
           <Link href="/" className="shrink-0" title="الرئيسية">
             <Logo variant="light" />
@@ -436,11 +436,12 @@ export default function AdminDashboardPage() {
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex shrink-0 items-center gap-1.5 sm:gap-3">
           <button
             onClick={loadAllData}
+            aria-label="تحديث البيانات"
             title="تحديث البيانات من السيرفر"
-            className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer flex items-center gap-1.5 text-xs font-bold"
+            className="min-h-11 p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer flex items-center gap-1.5 text-xs font-bold"
           >
             <RefreshCw className="w-4 h-4 text-[#C7F268]" />
             <span className="hidden sm:inline">تحديث</span>
@@ -449,7 +450,8 @@ export default function AdminDashboardPage() {
           <Link
             href="/warranty-verify"
             target="_blank"
-            className="p-2 px-3 rounded-xl bg-[#C7F268]/20 hover:bg-[#C7F268]/30 text-[#C7F268] transition-colors text-xs font-bold flex items-center gap-1.5"
+            aria-label="فحص الضمان بالموقع"
+            className="min-h-11 p-2 sm:px-3 rounded-xl bg-[#C7F268]/20 hover:bg-[#C7F268]/30 text-[#C7F268] transition-colors text-xs font-bold flex items-center gap-1.5"
           >
             <ExternalLink className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">فحص الضمان بالموقع</span>
@@ -457,7 +459,7 @@ export default function AdminDashboardPage() {
 
           <button
             onClick={handleLogout}
-            className="p-2 px-3 rounded-xl bg-red-500/20 hover:bg-red-500/30 text-red-200 transition-colors text-xs font-bold flex items-center gap-1.5 cursor-pointer"
+            className="min-h-11 p-2 sm:px-3 rounded-xl bg-red-500/20 hover:bg-red-500/30 text-red-200 transition-colors text-xs font-bold flex items-center gap-1.5 cursor-pointer"
           >
             <LogOut className="w-3.5 h-3.5" />
             <span>خروج</span>
@@ -468,57 +470,57 @@ export default function AdminDashboardPage() {
       {/* Main Content Area */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
         {/* Stats Strip */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          <div className="bg-white p-4 sm:p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4">
+          <div className="min-w-0 bg-white p-3 sm:p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between gap-2">
             <div>
               <span className="text-xs text-gray-500 font-bold block">إجمالي طلبات الحجز</span>
               <span className="text-2xl font-black text-[#033F2D] mt-1 block">{bookings.length}</span>
             </div>
-            <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
+            <div className="size-8 sm:size-10 shrink-0 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
               <CalendarCheck className="w-5 h-5" />
             </div>
           </div>
 
-          <div className="bg-white p-4 sm:p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between">
+          <div className="min-w-0 bg-white p-3 sm:p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between gap-2">
             <div>
               <span className="text-xs text-gray-500 font-bold block">طلبات جديدة للمتابعة</span>
               <span className="text-2xl font-black text-amber-600 mt-1 block">
                 {bookings.filter((b) => b.status === 'new').length}
               </span>
             </div>
-            <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold">
+            <div className="size-8 sm:size-10 shrink-0 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold">
               <Clock className="w-5 h-5" />
             </div>
           </div>
 
-          <div className="bg-white p-4 sm:p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between">
+          <div className="min-w-0 bg-white p-3 sm:p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between gap-2">
             <div>
               <span className="text-xs text-gray-500 font-bold block">شهادات الضمان المسجلة</span>
               <span className="text-2xl font-black text-[#033F2D] mt-1 block">{warranties.length}</span>
             </div>
-            <div className="w-10 h-10 rounded-xl bg-[#033F2D] text-[#C7F268] flex items-center justify-center font-bold">
+            <div className="size-8 sm:size-10 shrink-0 rounded-xl bg-[#033F2D] text-[#C7F268] flex items-center justify-center font-bold">
               <ShieldCheck className="w-5 h-5" />
             </div>
           </div>
 
-          <div className="bg-white p-4 sm:p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between">
+          <div className="min-w-0 bg-white p-3 sm:p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between gap-2">
             <div>
               <span className="text-xs text-gray-500 font-bold block">شهادات ضمان سارية</span>
               <span className="text-2xl font-black text-[#059669] mt-1 block">
                 {warranties.filter((w) => w.status === 'active').length}
               </span>
             </div>
-            <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">
+            <div className="size-8 sm:size-10 shrink-0 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">
               <CheckCircle2 className="w-5 h-5" />
             </div>
           </div>
         </div>
 
         {/* Tab Selector */}
-        <div className="flex items-center gap-2 border-b border-gray-200 pb-3">
+        <div className="grid grid-cols-2 gap-2 border-b border-gray-200 pb-3 sm:flex">
           <button
             onClick={() => setActiveTab('bookings')}
-            className={`px-5 py-2.5 rounded-xl font-bold text-sm transition-all flex items-center gap-2 cursor-pointer ${
+            className={`min-h-11 px-2 sm:px-5 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer ${
               activeTab === 'bookings'
                 ? 'bg-[#033F2D] text-[#C7F268] shadow-md'
                 : 'bg-white text-[#484C44] hover:bg-gray-100'
@@ -530,7 +532,7 @@ export default function AdminDashboardPage() {
 
           <button
             onClick={() => setActiveTab('warranties')}
-            className={`px-5 py-2.5 rounded-xl font-bold text-sm transition-all flex items-center gap-2 cursor-pointer ${
+            className={`min-h-11 px-2 sm:px-5 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer ${
               activeTab === 'warranties'
                 ? 'bg-[#033F2D] text-[#C7F268] shadow-md'
                 : 'bg-white text-[#484C44] hover:bg-gray-100'
@@ -546,7 +548,7 @@ export default function AdminDashboardPage() {
           <div className="space-y-4">
             {/* Search and Filters */}
             <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col sm:flex-row gap-3 items-center justify-between">
-              <div className="relative flex-1 w-full">
+              <div className="relative flex-1 min-w-0 w-full">
                 <Search className="w-4 h-4 text-gray-400 absolute right-3.5 top-1/2 -translate-y-1/2" />
                 <input
                   type="text"
@@ -596,8 +598,8 @@ export default function AdminDashboardPage() {
                   </p>
                 </div>
               ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-right text-sm">
+                <div className="lg:overflow-x-auto">
+                  <table className="pest-booking-table w-full text-start text-sm">
                     <thead className="bg-[#033F2D]/5 border-b border-gray-200 text-xs font-black text-[#033F2D]">
                       <tr>
                         <th className="p-3.5 px-4">العميل</th>
@@ -612,29 +614,30 @@ export default function AdminDashboardPage() {
                     <tbody className="divide-y divide-gray-100">
                       {filteredBookings.map((b) => (
                         <tr key={b.id} className="hover:bg-gray-50/80 transition-colors">
-                          <td className="p-3.5 px-4 font-bold text-[#033F2D]">
+                          <td data-label="العميل" className="p-3.5 px-4 font-bold text-[#033F2D]">
                             <div className="flex items-center gap-2">
                               <span className="w-7 h-7 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center text-xs font-black shrink-0">
                                 {b.name.charAt(0) || 'ع'}
                               </span>
-                              <span>{b.name}</span>
+                              <span className="min-w-0 [overflow-wrap:anywhere]">{b.name}</span>
                             </div>
                           </td>
-                          <td className="p-3.5 font-bold" dir="ltr">
+                          <td data-label="رقم الهاتف" className="p-3.5 font-bold">
                             <a
-                              href={`tel:${b.phone}`}
+                              href={`tel:${b.phone}`} dir="ltr"
                               className="text-[#033F2D] hover:text-[#059669] hover:underline"
                             >
                               {b.phone}
                             </a>
                           </td>
-                          <td className="p-3.5 text-xs text-gray-700 max-w-[200px] truncate">{b.service}</td>
-                          <td className="p-3.5 text-xs text-gray-500">{b.area || 'غير محدد'}</td>
-                          <td className="p-3.5 text-xs text-gray-400" dir="ltr">
+                          <td data-label="الخدمة المطلوبة" className="p-3.5 text-xs text-gray-700 max-w-[200px] truncate">{b.service}</td>
+                          <td data-label="المنطقة" className="p-3.5 text-xs text-gray-500">{b.area || 'غير محدد'}</td>
+                          <td data-label="تاريخ الإرسال" className="p-3.5 text-xs text-gray-400">
                             {b.createdAt ? new Date(b.createdAt).toLocaleDateString('ar-EG') : '—'}
                           </td>
-                          <td className="p-3.5">
+                          <td data-label="الحالة" className="p-3.5">
                             <select
+                              aria-label="حالة الحجز"
                               value={b.status}
                               onChange={(e) =>
                                 handleStatusChange(b.id, e.target.value as Booking['status'])
@@ -658,8 +661,8 @@ export default function AdminDashboardPage() {
                               <option value="cancelled">ملغي</option>
                             </select>
                           </td>
-                          <td className="p-3.5">
-                            <div className="flex items-center justify-center gap-1.5">
+                          <td data-label="إجراءات" className="p-3.5">
+                            <div className="flex flex-wrap items-center justify-start lg:justify-center gap-1.5">
                               {/* Open WhatsApp */}
                               <a
                                 href={`https://wa.me/2${b.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(
@@ -668,7 +671,7 @@ export default function AdminDashboardPage() {
                                 target="_blank"
                                 rel="noreferrer"
                                 title="مراسلة عبر واتساب"
-                                className="p-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white transition-colors"
+                                className="grid size-11 lg:size-8 place-items-center rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white transition-colors"
                               >
                                 <Phone className="w-3.5 h-3.5" />
                               </a>
@@ -677,7 +680,7 @@ export default function AdminDashboardPage() {
                               <button
                                 onClick={() => setSelectedBooking(b)}
                                 title="عرض التفاصيل"
-                                className="p-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 transition-colors cursor-pointer"
+                                className="grid size-11 lg:size-8 place-items-center rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 transition-colors cursor-pointer"
                               >
                                 <Eye className="w-3.5 h-3.5" />
                               </button>
@@ -686,7 +689,7 @@ export default function AdminDashboardPage() {
                               <button
                                 onClick={() => handleConvertBookingToWarranty(b)}
                                 title="إصدار شهادة ضمان لهذا العميل"
-                                className="p-1.5 rounded-lg bg-[#033F2D] hover:bg-[#055c42] text-[#C7F268] transition-colors cursor-pointer"
+                                className="grid size-11 lg:size-8 place-items-center rounded-lg bg-[#033F2D] hover:bg-[#055c42] text-[#C7F268] transition-colors cursor-pointer"
                               >
                                 <ShieldCheck className="w-3.5 h-3.5" />
                               </button>
@@ -695,7 +698,7 @@ export default function AdminDashboardPage() {
                               <button
                                 onClick={() => handleDeleteBooking(b.id)}
                                 title="حذف الطلب"
-                                className="p-1.5 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 transition-colors cursor-pointer"
+                                className="grid size-11 lg:size-8 place-items-center rounded-lg bg-red-50 hover:bg-red-100 text-red-600 transition-colors cursor-pointer"
                               >
                                 <Trash2 className="w-3.5 h-3.5" />
                               </button>
@@ -716,7 +719,7 @@ export default function AdminDashboardPage() {
           <div className="space-y-4">
             {/* Header Action Bar */}
             <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col sm:flex-row gap-3 items-center justify-between">
-              <div className="relative flex-1 w-full">
+              <div className="relative flex-1 min-w-0 w-full">
                 <Search className="w-4 h-4 text-gray-400 absolute right-3.5 top-1/2 -translate-y-1/2" />
                 <input
                   type="text"
@@ -780,8 +783,8 @@ export default function AdminDashboardPage() {
                   >
                     <div className="space-y-3">
                       {/* Code and Status Badge */}
-                      <div className="flex items-center justify-between">
-                        <span className="font-mono text-xs font-black px-2.5 py-1 rounded-lg bg-[#033F2D] text-[#C7F268] tracking-wider">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <span className="max-w-full [overflow-wrap:anywhere] font-mono text-xs font-black px-2.5 py-1 rounded-lg bg-[#033F2D] text-[#C7F268] tracking-wider">
                           {w.code}
                         </span>
                         <span
@@ -820,7 +823,7 @@ export default function AdminDashboardPage() {
                       </div>
 
                       {/* Dates */}
-                      <div className="flex items-center justify-between text-[11px] text-gray-400 border-t pt-2" dir="ltr">
+                      <div className="flex flex-wrap items-center justify-between gap-1 text-[11px] text-gray-400 border-t pt-2" dir="ltr">
                         <span>Issue: {w.issueDate}</span>
                         <span className="font-bold text-emerald-700">Expires: {w.expiryDate}</span>
                       </div>
@@ -864,22 +867,23 @@ export default function AdminDashboardPage() {
 
       {/* CREATE NEW WARRANTY MODAL */}
       {showWarrantyModal && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto" dir="rtl">
-          <div className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden my-8">
-            <div className="bg-[#033F2D] text-white p-5 px-6 flex items-center justify-between">
+        <div className="pest-modal-overlay bg-black/60" dir="rtl">
+          <div role="dialog" aria-modal="true" aria-labelledby="warranty-create" className="pest-modal-panel relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden">
+            <div className="bg-[#033F2D] text-white p-4 sm:p-5 shrink-0 flex items-center justify-between gap-3">
               <div>
                 <span className="text-xs font-bold text-[#C7F268] block">إصدار وتوثيق شهادة ضمان</span>
-                <h3 className="text-lg font-black text-white">إدخال كود وبيانات العميل في Supabase</h3>
+                <h3 id="warranty-create" className="text-lg font-black text-white">إدخال كود وبيانات العميل في Supabase</h3>
               </div>
               <button
                 onClick={() => setShowWarrantyModal(false)}
-                className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white cursor-pointer"
+                aria-label="إغلاق"
+                className="size-11 shrink-0 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white cursor-pointer"
               >
                 ✕
               </button>
             </div>
 
-            <form onSubmit={handleSaveWarranty} className="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
+            <form onSubmit={handleSaveWarranty} className="pest-modal-body p-4 sm:p-6 space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {/* Code Field with Auto Generate */}
                 <div>
@@ -1053,7 +1057,7 @@ export default function AdminDashboardPage() {
                 />
               </div>
 
-              <div className="pt-4 border-t flex items-center justify-end gap-3">
+              <div className="pt-4 border-t flex flex-wrap items-center justify-end gap-2 sm:gap-3">
                 <button
                   type="button"
                   onClick={() => setShowWarrantyModal(false)}
@@ -1086,18 +1090,19 @@ export default function AdminDashboardPage() {
 
       {/* SELECTED BOOKING DETAIL MODAL */}
       {selectedBooking && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" dir="rtl">
-          <div className="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden">
-            <div className="bg-[#033F2D] text-white p-5 flex items-center justify-between">
-              <h3 className="text-base font-black">تفاصيل طلب حجز الخدمة</h3>
+        <div className="pest-modal-overlay bg-black/60" dir="rtl">
+          <div role="dialog" aria-modal="true" aria-labelledby="booking-detail" className="pest-modal-panel relative w-full max-w-lg bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden">
+            <div className="bg-[#033F2D] text-white p-4 sm:p-5 shrink-0 flex items-center justify-between gap-3">
+              <h3 id="booking-detail" className="text-base font-black">تفاصيل طلب حجز الخدمة</h3>
               <button
                 onClick={() => setSelectedBooking(null)}
-                className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white cursor-pointer"
+                aria-label="إغلاق"
+                className="size-11 shrink-0 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white cursor-pointer"
               >
                 ✕
               </button>
             </div>
-            <div className="p-6 space-y-4 text-sm">
+            <div className="pest-modal-body p-4 sm:p-6 space-y-4 text-sm [overflow-wrap:anywhere]">
               <div className="p-4 rounded-2xl bg-gray-50 border space-y-2">
                 <p>
                   <strong className="text-gray-500">اسم العميل:</strong>{' '}
@@ -1162,21 +1167,22 @@ export default function AdminDashboardPage() {
 
       {/* SELECTED WARRANTY DETAIL MODAL */}
       {selectedWarranty && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" dir="rtl">
-          <div className="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl border-2 border-emerald-500 overflow-hidden">
-            <div className="bg-[#033F2D] text-white p-5 flex items-center justify-between">
+        <div className="pest-modal-overlay bg-black/60" dir="rtl">
+          <div role="dialog" aria-modal="true" aria-labelledby="warranty-detail" className="pest-modal-panel relative w-full max-w-lg bg-white rounded-3xl shadow-2xl border-2 border-emerald-500 overflow-hidden">
+            <div className="bg-[#033F2D] text-white p-4 sm:p-5 shrink-0 flex items-center justify-between gap-3">
               <div>
                 <span className="text-xs font-mono font-bold text-[#C7F268]">{selectedWarranty.code}</span>
-                <h3 className="text-base font-black">شهادة ضمان إلكترونية موثقة</h3>
+                <h3 id="warranty-detail" className="text-base font-black">شهادة ضمان إلكترونية موثقة</h3>
               </div>
               <button
                 onClick={() => setSelectedWarranty(null)}
-                className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white cursor-pointer"
+                aria-label="إغلاق"
+                className="size-11 shrink-0 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white cursor-pointer"
               >
                 ✕
               </button>
             </div>
-            <div className="p-6 space-y-4 text-sm">
+            <div className="pest-modal-body p-4 sm:p-6 space-y-4 text-sm [overflow-wrap:anywhere]">
               <div className="p-4 rounded-2xl bg-[#F6F8F5] border space-y-2">
                 <p>
                   <strong className="text-gray-500">اسم العميل:</strong>{' '}
@@ -1216,7 +1222,7 @@ export default function AdminDashboardPage() {
                 </div>
               )}
 
-              <div className="pt-2 flex items-center justify-between">
+              <div className="pt-2 flex flex-wrap items-center justify-between gap-3">
                 <span className="text-xs font-bold text-emerald-700">
                   ✓ مسجلة رسمياً في قاعدة بيانات Supabase
                 </span>
