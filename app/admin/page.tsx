@@ -132,9 +132,6 @@ export default function AdminDashboardPage() {
   useEffect(() => {
     if (!isAuthenticated) return;
 
-    setLoadingBookings(true);
-    setLoadingWarranties(true);
-
     const unsubscribeBookings = subscribeToBookings(
       (bData) => {
         setBookings(bData);

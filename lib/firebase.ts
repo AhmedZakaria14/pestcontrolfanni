@@ -16,7 +16,9 @@ import {
 import firebaseConfig from '../firebase-applet-config.json';
 
 const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
-export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
+export const db = firebaseConfig.firestoreDatabaseId
+  ? getFirestore(app, firebaseConfig.firestoreDatabaseId)
+  : getFirestore(app);
 export const auth = getAuth(app);
 
 export enum OperationType {
@@ -111,6 +113,16 @@ export async function saveBookingToFirestore(
   };
 
   const path = `bookings/${bookingId}`;
+
+  // Mirror save to Cloud SQL API
+  if (typeof window !== 'undefined') {
+    fetch('/api/bookings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newBooking),
+    }).catch((err) => console.warn('Cloud SQL API mirror warning:', err));
+  }
+
   try {
     await setDoc(doc(db, 'bookings', bookingId), newBooking);
     return newBooking;
@@ -201,6 +213,16 @@ export async function saveWarrantyToFirestore(
   };
 
   const path = `warranties/${cleanCode}`;
+
+  // Mirror save to Cloud SQL API
+  if (typeof window !== 'undefined') {
+    fetch('/api/warranties', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(warrantyDoc),
+    }).catch((err) => console.warn('Cloud SQL warranty API mirror warning:', err));
+  }
+
   try {
     await setDoc(doc(db, 'warranties', cleanCode), warrantyDoc);
     return warrantyDoc;

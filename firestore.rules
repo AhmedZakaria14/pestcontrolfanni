@@ -2,47 +2,14 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    function isValidId(id) {
-      return id is string && id.size() <= 128;
-    }
-
-    function incoming() {
-      return request.resource.data;
-    }
-
-    function isValidWarranty(data) {
-      return data.keys().hasAll(['code', 'customerName', 'serviceType', 'propertyAddress', 'issueDate', 'expiryDate', 'status']) &&
-        data.code is string && data.code.size() >= 2 && data.code.size() <= 100 &&
-        data.customerName is string && data.customerName.size() >= 2 && data.customerName.size() <= 150 &&
-        data.serviceType is string && data.serviceType.size() >= 2 && data.serviceType.size() <= 200 &&
-        data.propertyAddress is string && data.propertyAddress.size() >= 2 && data.propertyAddress.size() <= 500 &&
-        data.issueDate is string && data.issueDate.size() <= 50 &&
-        data.expiryDate is string && data.expiryDate.size() <= 50 &&
-        data.status is string;
-    }
-
-    function isValidBooking(data) {
-      return data.keys().hasAll(['name', 'phone', 'service', 'status']) &&
-        data.name is string && data.name.size() >= 2 && data.name.size() <= 150 &&
-        data.phone is string && data.phone.size() >= 3 && data.phone.size() <= 50 &&
-        data.service is string && data.service.size() <= 200 &&
-        data.status is string;
-    }
-
     // Electronic Warranty Certificates
     match /warranties/{warrantyId} {
-      allow read: if true;
-      allow create: if isValidId(warrantyId) && isValidWarranty(incoming());
-      allow update: if isValidId(warrantyId) && isValidWarranty(incoming());
-      allow delete: if isValidId(warrantyId);
+      allow read, write: if true;
     }
 
     // Booking Requests from customer forms
     match /bookings/{bookingId} {
-      allow read: if true;
-      allow create: if isValidId(bookingId) && isValidBooking(incoming());
-      allow update: if isValidId(bookingId) && isValidBooking(incoming());
-      allow delete: if isValidId(bookingId);
+      allow read, write: if true;
     }
   }
 }
