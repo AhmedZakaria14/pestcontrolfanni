@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { saveBookingToFirestore } from '@/lib/firebase';
+import type { Booking } from '@/lib/pest-data';
 
 export function useBookingSubmission(locale: string) {
   const pending = useRef(false);
@@ -7,7 +7,7 @@ export function useBookingSubmission(locale: string) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
 
-  async function submit(data: Parameters<typeof saveBookingToFirestore>[0]) {
+  async function submit(data: Pick<Booking, 'name' | 'phone' | 'service' | 'area' | 'notes' | 'source'>) {
     if (pending.current) return false;
 
     pending.current = true;
@@ -15,7 +15,14 @@ export function useBookingSubmission(locale: string) {
     setError('');
     try {
       bookingId.current ??= `book-${crypto.randomUUID()}`;
-      await saveBookingToFirestore({ ...data, id: bookingId.current });
+      const res = await fetch('/api/bookings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...data, id: bookingId.current }),
+      });
+      if (!res.ok) throw new Error(`Booking save failed (${res.status})`);
+      const result = await res.json();
+      if (!result.success || result.id !== bookingId.current) throw new Error('Booking save was not confirmed');
       bookingId.current = undefined;
       return true;
     } catch (err) {
