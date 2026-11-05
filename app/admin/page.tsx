@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import {
   ShieldCheck,
@@ -168,7 +168,11 @@ export default function AdminDashboardPage() {
 
     const unsubscribeBookings = subscribeToBookings(
       (bData) => {
-        setBookings(bData);
+        // Only update if we have data or if the manual load already finished, 
+        // to avoid overwriting API data with initial empty Firestore state
+        if (bData.length > 0 || !loadingBookings) {
+          setBookings(bData);
+        }
         setLoadingBookings(false);
       },
       (err) => {
@@ -179,7 +183,9 @@ export default function AdminDashboardPage() {
 
     const unsubscribeWarranties = subscribeToWarranties(
       (wData) => {
-        setWarranties(wData);
+        if (wData.length > 0 || !loadingWarranties) {
+          setWarranties(wData);
+        }
         setLoadingWarranties(false);
       },
       (err) => {
@@ -187,6 +193,7 @@ export default function AdminDashboardPage() {
         setLoadingWarranties(false);
       }
     );
+
 
     return () => {
       unsubscribeBookings();

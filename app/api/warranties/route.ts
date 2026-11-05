@@ -35,7 +35,7 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const cleanCode = body.code?.trim().toUpperCase();
+    const cleanCode = (body.id || body.code)?.trim().toUpperCase();
     if (!cleanCode) {
       return NextResponse.json({ success: false, error: 'Missing warranty code' }, { status: 400 });
     }
@@ -59,6 +59,7 @@ export async function POST(req: NextRequest) {
       createdAt: now,
       updatedAt: now,
     };
+
 
     let savedInSql = false;
     try {

@@ -37,7 +37,7 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const bookingId = `book-${Date.now()}-${Math.floor(100 + Math.random() * 900)}`;
+    const bookingId = body.id || `book-${Date.now()}-${Math.floor(100 + Math.random() * 900)}`;
     const now = new Date();
 
     const newBooking = {
@@ -52,6 +52,7 @@ export async function POST(req: NextRequest) {
       createdAt: now,
       updatedAt: now,
     };
+
 
     // Save to Cloud SQL if available
     let savedInSql = false;

@@ -833,14 +833,15 @@ export default function PestIdentifierTool() {
               </div>
               <h4 className="text-2xl font-black text-[#033F2D]">
                 {locale === 'en'
-                  ? 'Photo Received & Connecting to WhatsApp!'
-                  : 'تم استلام صورتك وجارٍ ربطك بالواتساب!'}
+                  ? 'Request Received Successfully!'
+                  : 'تم استلام طلبك بنجاح!'}
               </h4>
               <p className="text-sm text-gray-600 max-w-sm mx-auto leading-relaxed">
                 {locale === 'en'
-                  ? `Thank you, ${userName || 'valued customer'}. Our technician is analyzing your submission and will provide your free diagnosis on (${userPhone}).`
-                  : `شكراً لك يا ${userName || 'عميلنا العزيز'}. يقوم أخصائي الفحص الميداني لدينا بفحص الصورة الآن وسيتواصل معك على الرقم (${userPhone}) لإعطائك التشخيص الدقيق مجاناً.`}
+                  ? `Thank you, ${userName || 'valued customer'}. Our specialist is reviewing your photo and will contact you shortly on (${userPhone}).`
+                  : `شكراً لك يا ${userName || 'عميلنا العزيز'}. يقوم أخصائي الفحص لدينا بمراجعة الصورة الآن وسيتواصل معك قريباً على الرقم (${userPhone}).`}
               </p>
+
               <button
                 onClick={() => {
                   setUploadSubmitted(false);

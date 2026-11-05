@@ -95,9 +95,10 @@ export interface FirebaseBooking {
 export async function saveBookingToFirestore(
   bookingData: Omit<FirebaseBooking, 'id' | 'createdAt' | 'status'> & {
     status?: FirebaseBooking['status'];
+    id?: string;
   }
 ): Promise<FirebaseBooking> {
-  const bookingId = `book-${Date.now()}-${Math.floor(100 + Math.random() * 900)}`;
+  const bookingId = bookingData.id || `book-${Date.now()}-${Math.floor(100 + Math.random() * 900)}`;
   const now = new Date().toISOString();
   const newBooking: FirebaseBooking = {
     id: bookingId,
@@ -114,15 +115,24 @@ export async function saveBookingToFirestore(
 
   const path = `bookings/${bookingId}`;
 
-  // Mirror save to Cloud SQL API
+  // If on client, try API first for Cloud SQL + Firestore dual save
   if (typeof window !== 'undefined') {
-    fetch('/api/bookings', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(newBooking),
-    }).catch((err) => console.warn('Cloud SQL API mirror warning:', err));
+    try {
+      const res = await fetch('/api/bookings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newBooking),
+      });
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success) return json.booking || newBooking;
+      }
+    } catch (apiErr) {
+      console.warn('API dual save failed, falling back to direct Firestore:', apiErr);
+    }
   }
 
+  // Fallback or Server-side save directly to Firestore
   try {
     await setDoc(doc(db, 'bookings', bookingId), newBooking);
     return newBooking;
@@ -130,6 +140,7 @@ export async function saveBookingToFirestore(
     handleFirestoreError(error, OperationType.CREATE, path);
   }
 }
+
 
 export async function fetchBookingsFromFirestore(): Promise<FirebaseBooking[]> {
   const path = 'bookings';
@@ -200,9 +211,9 @@ export async function deleteBookingFromFirestore(bookingId: string): Promise<voi
 
 // Warranties CRUD
 export async function saveWarrantyToFirestore(
-  warrantyData: Omit<FirebaseWarranty, 'id' | 'createdAt'>
+  warrantyData: Omit<FirebaseWarranty, 'id' | 'createdAt'> & { id?: string }
 ): Promise<FirebaseWarranty> {
-  const cleanCode = warrantyData.code.trim().toUpperCase();
+  const cleanCode = (warrantyData.id || warrantyData.code).trim().toUpperCase();
   const now = new Date().toISOString();
   const warrantyDoc: FirebaseWarranty = {
     id: cleanCode,
@@ -214,15 +225,24 @@ export async function saveWarrantyToFirestore(
 
   const path = `warranties/${cleanCode}`;
 
-  // Mirror save to Cloud SQL API
+  // If on client, try API first for Cloud SQL + Firestore dual save
   if (typeof window !== 'undefined') {
-    fetch('/api/warranties', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(warrantyDoc),
-    }).catch((err) => console.warn('Cloud SQL warranty API mirror warning:', err));
+    try {
+      const res = await fetch('/api/warranties', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(warrantyDoc),
+      });
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success) return json.warranty || warrantyDoc;
+      }
+    } catch (apiErr) {
+      console.warn('API dual save failed, falling back to direct Firestore:', apiErr);
+    }
   }
 
+  // Fallback or Server-side save directly to Firestore
   try {
     await setDoc(doc(db, 'warranties', cleanCode), warrantyDoc);
     return warrantyDoc;
@@ -230,6 +250,7 @@ export async function saveWarrantyToFirestore(
     handleFirestoreError(error, OperationType.WRITE, path);
   }
 }
+
 
 export async function fetchWarrantiesFromFirestore(): Promise<FirebaseWarranty[]> {
   const path = 'warranties';
