@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
+import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   PhoneCall,
@@ -31,6 +32,13 @@ function OfficialWhatsAppIcon({ className = 'w-5 h-5' }: { className?: string })
 }
 
 export default function FloatingContactDock() {
+  const pathname = usePathname();
+  if (pathname === '/admin' || pathname?.startsWith('/admin/')) return null;
+
+  return <ContactDock />;
+}
+
+function ContactDock() {
   // Collapsed by default as requested
   const [isExpanded, setIsExpanded] = useState(false);
   const [showCallMenu, setShowCallMenu] = useState(false);
