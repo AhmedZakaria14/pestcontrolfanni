@@ -29,27 +29,21 @@ import {
 } from 'lucide-react';
 import Logo from '@/components/Logo';
 import { useLanguage } from '@/lib/i18n';
-import {
-  FirebaseBooking,
-  FirebaseWarranty,
-  fetchWarrantiesFromFirestore,
-  saveWarrantyToFirestore,
-  deleteWarrantyFromFirestore,
-  subscribeToWarranties,
-} from '@/lib/firebase';
-
-type AdminBooking = FirebaseBooking & { storage: 'firestore' | 'cloudsql' };
+import type { Booking, Warranty } from '@/lib/pest-data';
+import { supabase } from '@/lib/supabase';
 
 export default function AdminDashboardPage() {
   const { locale, isRTL } = useLanguage();
 
-  // Authentication State with lazy initializer
-  const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return sessionStorage.getItem('admin_session_auth') === 'true';
-    }
-    return false;
-  });
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [emailInput, setEmailInput] = useState('');
+  const [signingIn, setSigningIn] = useState(false);
+  useEffect(() => {
+    const { data } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsAuthenticated(session?.user.app_metadata.role === 'pest_admin');
+    });
+    return () => data.subscription.unsubscribe();
+  }, []);
   const [passwordInput, setPasswordInput] = useState('');
   const [loginError, setLoginError] = useState('');
 
@@ -57,18 +51,19 @@ export default function AdminDashboardPage() {
   const [activeTab, setActiveTab] = useState<'bookings' | 'warranties'>('bookings');
 
   // Bookings Data & Filter
-  const [bookings, setBookings] = useState<AdminBooking[]>([]);
+  const [bookings, setBookings] = useState<Booking[]>([]);
   const [bookingSearch, setBookingSearch] = useState('');
   const [bookingStatusFilter, setBookingStatusFilter] = useState<string>('all');
   const [loadingBookings, setLoadingBookings] = useState(false);
-  const [bookingLoadError, setBookingLoadError] = useState<'partial' | 'failed' | null>(null);
+  const [bookingLoadError, setBookingLoadError] = useState(false);
   const bookingsRequest = useRef(0);
 
   // Warranties Data & Filter
-  const [warranties, setWarranties] = useState<FirebaseWarranty[]>([]);
+  const [warranties, setWarranties] = useState<Warranty[]>([]);
   const [warrantySearch, setWarrantySearch] = useState('');
   const [warrantyStatusFilter, setWarrantyStatusFilter] = useState<string>('all');
   const [loadingWarranties, setLoadingWarranties] = useState(false);
+  const [warrantyLoadError, setWarrantyLoadError] = useState(false);
 
   // New Warranty Modal / Form State
   const [showWarrantyModal, setShowWarrantyModal] = useState(false);
@@ -89,8 +84,8 @@ export default function AdminDashboardPage() {
   });
 
   // Selected Item Detail Modal
-  const [selectedBooking, setSelectedBooking] = useState<FirebaseBooking | null>(null);
-  const [selectedWarranty, setSelectedWarranty] = useState<FirebaseWarranty | null>(null);
+  const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
+  const [selectedWarranty, setSelectedWarranty] = useState<Warranty | null>(null);
 
   // Success Notification
   const [notification, setNotification] = useState<string | null>(null);
@@ -104,15 +99,14 @@ export default function AdminDashboardPage() {
     const request = ++bookingsRequest.current;
     if (showLoading) setLoadingBookings(true);
     try {
-      const res = await fetch('/api/bookings', { cache: 'no-store' });
-      if (!res.ok) throw new Error(`Booking list request failed (${res.status})`);
-      const result = await res.json();
+      const { data, error } = await supabase.from('bookings').select().order('createdAt', { ascending: false });
+      if (error) throw error;
       if (request !== bookingsRequest.current) return;
-      setBookings(result.data);
-      setBookingLoadError(result.partial ? 'partial' : null);
+      setBookings(data);
+      setBookingLoadError(false);
     } catch (err) {
       console.error('Failed to load bookings:', err);
-      if (request === bookingsRequest.current) setBookingLoadError('failed');
+      if (request === bookingsRequest.current) setBookingLoadError(true);
     } finally {
       if (request === bookingsRequest.current) setLoadingBookings(false);
     }
@@ -120,35 +114,24 @@ export default function AdminDashboardPage() {
 
   const loadWarranties = useCallback(async () => {
     setLoadingWarranties(true);
-    let loaded = false;
     try {
-      const res = await fetch('/api/warranties');
-      if (res.ok) {
-        const json = await res.json();
-        if (json.success && Array.isArray(json.data) && json.data.length > 0) {
-          setWarranties(json.data);
-          loaded = true;
-        }
-      }
-    } catch (apiErr) {
-      console.warn('API load warranties fallback:', apiErr);
+      const { data, error } = await supabase.from('warranties').select().order('createdAt', { ascending: false });
+      if (error) throw error;
+      setWarranties(data);
+      setWarrantyLoadError(false);
+    } catch (error) {
+      console.error('Failed to load warranties:', error);
+      setWarrantyLoadError(true);
+    } finally {
+      setLoadingWarranties(false);
     }
-    if (!loaded) {
-      try {
-        const data = await fetchWarrantiesFromFirestore();
-        setWarranties(data || []);
-      } catch (err) {
-        console.error('Failed to load warranties:', err);
-      }
-    }
-    setLoadingWarranties(false);
   }, []);
 
   const loadAllData = useCallback(async () => {
     await Promise.all([loadBookings(), loadWarranties()]);
   }, [loadBookings, loadWarranties]);
 
-  // Real-time Firestore subscriptions when authenticated
+  // Real-time Supabase subscriptions when authenticated
   useEffect(() => {
     if (!isAuthenticated) return;
 
@@ -160,60 +143,52 @@ export default function AdminDashboardPage() {
 
     const bookingRefresh = window.setInterval(() => void loadBookings(false), 30_000);
 
-    const unsubscribeWarranties = subscribeToWarranties(
-      (wData) => {
-        if (wData.length > 0 || !loadingWarranties) {
-          setWarranties(wData);
-        }
-        setLoadingWarranties(false);
-      },
-      (err) => {
-        console.error('Warranties subscription error:', err);
-        setLoadingWarranties(false);
-      }
-    );
-
-
     return () => {
       window.clearInterval(bookingRefresh);
       bookingsRequest.current++;
-      unsubscribeWarranties();
     };
   }, [isAuthenticated, loadAllData, loadBookings]);
 
-  // Handle Login
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Default master passkey or environment key
-    if (passwordInput === 'admin2026' || passwordInput === 'azeco44@gmail.com') {
-      setIsAuthenticated(true);
-      sessionStorage.setItem('admin_session_auth', 'true');
-      setLoginError('');
-      showToast(locale === 'en' ? 'Welcome to Admin Control Panel' : 'مرحباً بك في لوحة تحكم الإدارة');
-    } else {
-      setLoginError(locale === 'en' ? 'Invalid password. Try again.' : 'كلمة المرور غير صحيحة. يرجى المحاولة ثانية.');
+    setLoginError('');
+    setSigningIn(true);
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: emailInput.trim(), password: passwordInput,
+      });
+      if (error) throw error;
+      if (data.user.app_metadata.role !== 'pest_admin') {
+        await supabase.auth.signOut({ scope: 'local' });
+        throw new Error('Admin role required');
+      }
+      setPasswordInput('');
+    } catch {
+      setLoginError(locale === 'en' ? 'Could not sign in as admin.' : 'تعذّر تسجيل الدخول بحساب الأدمن.');
+    } finally {
+      setSigningIn(false);
     }
   };
 
-  const handleLogout = () => {
-    setIsAuthenticated(false);
-    sessionStorage.removeItem('admin_session_auth');
-    setPasswordInput('');
+  const handleLogout = async () => {
+    const { error } = await supabase.auth.signOut({ scope: 'local' });
+    if (error) {
+      showToast(locale === 'en' ? 'Could not sign out.' : 'تعذّر تسجيل الخروج.');
+      return;
+    }
+    setBookings([]);
+    setWarranties([]);
+    setSelectedBooking(null);
+    setSelectedWarranty(null);
   };
 
   // Update Booking Status
-  const handleStatusChange = async (bookingId: string, newStatus: FirebaseBooking['status']) => {
+  const handleStatusChange = async (bookingId: string, newStatus: Booking['status']) => {
     try {
-      const res = await fetch('/api/bookings', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          id: bookingId,
-          status: newStatus,
-          storage: bookings.find((booking) => booking.id === bookingId)?.storage,
-        }),
-      });
-      if (!res.ok) throw new Error(`Booking update failed (${res.status})`);
+      const { error } = await supabase.from('bookings')
+        .update({ status: newStatus, updatedAt: new Date().toISOString() })
+        .eq('id', bookingId).select('id').single();
+      if (error) throw error;
       void loadBookings(false);
       setBookings((prev) =>
         prev.map((b) => (b.id === bookingId ? { ...b, status: newStatus } : b))
@@ -232,11 +207,8 @@ export default function AdminDashboardPage() {
   const handleDeleteBooking = async (bookingId: string) => {
     if (!confirm(locale === 'en' ? 'Delete this booking request?' : 'هل تريد حذف طلب الحجز هذا نهائياً؟')) return;
     try {
-      const params = new URLSearchParams({ id: bookingId });
-      const storage = bookings.find((booking) => booking.id === bookingId)?.storage;
-      if (storage) params.set('storage', storage);
-      const res = await fetch(`/api/bookings?${params}`, { method: 'DELETE' });
-      if (!res.ok) throw new Error(`Booking deletion failed (${res.status})`);
+      const { error } = await supabase.from('bookings').delete().eq('id', bookingId).select('id').single();
+      if (error) throw error;
       void loadBookings(false);
       setBookings((prev) => prev.filter((b) => b.id !== bookingId));
       if (selectedBooking?.id === bookingId) setSelectedBooking(null);
@@ -249,8 +221,7 @@ export default function AdminDashboardPage() {
 
   // Generate Random Unique Warranty Code
   const generateNewWarrantyCode = () => {
-    const randomNum = Math.floor(1000 + Math.random() * 9000);
-    const newCode = `STC-2026-${randomNum}`;
+    const newCode = `STC-${crypto.randomUUID().replaceAll('-', '').slice(0, 16).toUpperCase()}`;
     setWarrantyFormData((prev) => ({ ...prev, code: newCode }));
   };
 
@@ -269,8 +240,10 @@ export default function AdminDashboardPage() {
       expiryDateObj.setFullYear(expiryDateObj.getFullYear() + Number(warrantyFormData.durationYears));
       const calculatedExpiry = expiryDateObj.toISOString().split('T')[0];
 
-      const saved = await saveWarrantyToFirestore({
-        code: warrantyFormData.code.trim().toUpperCase(),
+      const code = warrantyFormData.code.trim().toUpperCase();
+      const { data: saved, error } = await supabase.from('warranties').insert({
+        id: code,
+        code,
         customerName: warrantyFormData.customerName.trim(),
         customerPhone: warrantyFormData.customerPhone.trim(),
         serviceType: warrantyFormData.serviceType.trim(),
@@ -283,11 +256,12 @@ export default function AdminDashboardPage() {
         technicianName: warrantyFormData.technicianName.trim(),
         pesticideDetails: warrantyFormData.pesticideDetails.trim(),
         notes: warrantyFormData.notes.trim(),
-      });
+      }).select().single();
+      if (error) throw error;
 
       setWarranties((prev) => [saved, ...prev.filter((w) => w.code !== saved.code)]);
       setShowWarrantyModal(false);
-      showToast(locale === 'en' ? 'Warranty certificate issued & saved to Firebase' : 'تم إصدار وحفظ شهادة الضمان بنجاح في Firebase');
+      showToast(locale === 'en' ? 'Warranty certificate issued & saved to Supabase' : 'تم إصدار وحفظ شهادة الضمان بنجاح في Supabase');
 
       // Reset form
       setWarrantyFormData({
@@ -316,7 +290,8 @@ export default function AdminDashboardPage() {
   const handleDeleteWarranty = async (code: string) => {
     if (!confirm(locale === 'en' ? `Delete warranty code ${code}?` : `هل تريد حذف كود الضمان ${code} من قاعدة البيانات؟`)) return;
     try {
-      await deleteWarrantyFromFirestore(code);
+      const { error } = await supabase.from('warranties').delete().eq('code', code).select('id').single();
+      if (error) throw error;
       setWarranties((prev) => prev.filter((w) => w.code !== code));
       if (selectedWarranty?.code === code) setSelectedWarranty(null);
       showToast(locale === 'en' ? 'Warranty code deleted' : 'تم حذف كود الضمان بنجاح');
@@ -326,7 +301,7 @@ export default function AdminDashboardPage() {
   };
 
   // Convert Booking to Warranty prefill
-  const handleConvertBookingToWarranty = (booking: FirebaseBooking) => {
+  const handleConvertBookingToWarranty = (booking: Booking) => {
     generateNewWarrantyCode();
     setWarrantyFormData((prev) => ({
       ...prev,
@@ -391,6 +366,12 @@ export default function AdminDashboardPage() {
           </div>
 
           <form onSubmit={handleLogin} className="space-y-4">
+            <label className="block text-xs font-bold text-[#C7F268]">
+              البريد الإلكتروني للأدمن
+              <input type="email" required autoComplete="username" value={emailInput}
+                onChange={(e) => setEmailInput(e.target.value)} dir="ltr"
+                className="mt-1.5 w-full rounded-xl border border-white/20 bg-white/10 px-4 py-3 text-sm text-white" />
+            </label>
             <div>
               <label className="block text-xs font-bold text-[#C7F268] mb-1.5">
                 كلمة المرور الإدارية / رمز الدخول
@@ -398,7 +379,7 @@ export default function AdminDashboardPage() {
               <input
                 type="password"
                 required
-                autoFocus
+                autoComplete="current-password"
                 placeholder="أدخل كلمة مرور لوحة التحكم..."
                 value={passwordInput}
                 onChange={(e) => setPasswordInput(e.target.value)}
@@ -416,6 +397,7 @@ export default function AdminDashboardPage() {
 
             <button
               type="submit"
+              disabled={signingIn}
               className="w-full bg-[#C7F268] hover:bg-[#b5e050] text-[#033F2D] font-black py-3 px-6 rounded-xl text-sm transition-all shadow-lg hover:scale-[1.02] cursor-pointer"
             >
               تسجيل الدخول إلى النظام
@@ -450,7 +432,7 @@ export default function AdminDashboardPage() {
           </Link>
           <div className="hidden sm:block border-s border-white/20 ps-4">
             <span className="block text-xs font-bold text-[#C7F268]">لوحة التحكم الإدارية</span>
-            <span className="text-[11px] text-white/70">متصلة مباشرة بقواعد بيانات Firebase</span>
+            <span className="text-[11px] text-white/70">متصلة مباشرة بقواعد بيانات Supabase</span>
           </div>
         </div>
 
@@ -594,9 +576,7 @@ export default function AdminDashboardPage() {
 
             {bookingLoadError && (
               <p role="alert" className="mb-3 rounded-lg bg-amber-50 p-3 text-sm text-amber-900">
-                {bookingLoadError === 'partial'
-                  ? (locale === 'en' ? 'Some bookings could not be loaded.' : 'تعذّر تحميل بعض الحجوزات.')
-                  : (locale === 'en' ? 'Could not refresh bookings. Try again.' : 'تعذّر تحديث قائمة الحجوزات. حاول مرة أخرى.')}
+                {locale === 'en' ? 'Could not refresh bookings. Try again.' : 'تعذّر تحديث قائمة الحجوزات. حاول مرة أخرى.'}
               </p>
             )}
 
@@ -605,7 +585,7 @@ export default function AdminDashboardPage() {
               {loadingBookings ? (
                 <div className="p-12 text-center text-gray-400">
                   <RefreshCw className="w-8 h-8 animate-spin mx-auto text-[#033F2D] mb-2" />
-                  <p className="text-sm font-bold">جاري تحميل طلبات الحجز من Firebase...</p>
+                  <p className="text-sm font-bold">جاري تحميل طلبات الحجز من Supabase...</p>
                 </div>
               ) : filteredBookings.length === 0 ? (
                 <div className="p-12 text-center text-gray-500">
@@ -657,7 +637,7 @@ export default function AdminDashboardPage() {
                             <select
                               value={b.status}
                               onChange={(e) =>
-                                handleStatusChange(b.id, e.target.value as FirebaseBooking['status'])
+                                handleStatusChange(b.id, e.target.value as Booking['status'])
                               }
                               className={`text-xs font-bold px-2.5 py-1 rounded-lg border outline-none cursor-pointer ${
                                 b.status === 'new'
@@ -773,10 +753,15 @@ export default function AdminDashboardPage() {
             </div>
 
             {/* Warranties Grid */}
+            {warrantyLoadError && (
+              <p role="alert" className="mb-3 rounded-lg bg-amber-50 p-3 text-sm text-amber-900">
+                {locale === 'en' ? 'Could not load warranties.' : 'تعذّر تحميل شهادات الضمان.'}
+              </p>
+            )}
             {loadingWarranties ? (
               <div className="bg-white p-12 rounded-2xl border text-center text-gray-400">
                 <RefreshCw className="w-8 h-8 animate-spin mx-auto text-[#033F2D] mb-2" />
-                <p className="text-sm font-bold">جاري تحميل شهادات الضمان من قاعدة بيانات Firebase...</p>
+                <p className="text-sm font-bold">جاري تحميل شهادات الضمان من قاعدة بيانات Supabase...</p>
               </div>
             ) : filteredWarranties.length === 0 ? (
               <div className="bg-white p-12 rounded-2xl border border-gray-100 text-center text-gray-500">
@@ -884,7 +869,7 @@ export default function AdminDashboardPage() {
             <div className="bg-[#033F2D] text-white p-5 px-6 flex items-center justify-between">
               <div>
                 <span className="text-xs font-bold text-[#C7F268] block">إصدار وتوثيق شهادة ضمان</span>
-                <h3 className="text-lg font-black text-white">إدخال كود وبيانات العميل في Firebase</h3>
+                <h3 className="text-lg font-black text-white">إدخال كود وبيانات العميل في Supabase</h3>
               </div>
               <button
                 onClick={() => setShowWarrantyModal(false)}
@@ -1084,7 +1069,7 @@ export default function AdminDashboardPage() {
                   {savingWarranty ? (
                     <>
                       <RefreshCw className="w-4 h-4 animate-spin" />
-                      <span>جاري الحفظ في Firebase...</span>
+                      <span>جاري الحفظ في Supabase...</span>
                     </>
                   ) : (
                     <>
@@ -1233,7 +1218,7 @@ export default function AdminDashboardPage() {
 
               <div className="pt-2 flex items-center justify-between">
                 <span className="text-xs font-bold text-emerald-700">
-                  ✓ مسجلة رسمياً في قاعدة بيانات Firestore
+                  ✓ مسجلة رسمياً في قاعدة بيانات Supabase
                 </span>
                 <Link
                   href={`/warranty-verify`}

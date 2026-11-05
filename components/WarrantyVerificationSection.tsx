@@ -8,100 +8,14 @@ import {
   CheckCircle2,
   AlertTriangle,
   Calendar,
-  User,
-  MapPin,
   Wrench,
   RefreshCw,
   Award,
 } from 'lucide-react';
-import { collection, query, where, getDocs, setDoc, doc } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
 import { useLanguage } from '@/lib/i18n';
+import type { Warranty } from '@/lib/pest-data';
 
-interface WarrantyData {
-  id: string;
-  code: string;
-  customerName: string;
-  serviceType: string;
-  propertyAddress: string;
-  issueDate: string;
-  expiryDate: string;
-  status: 'active' | 'expired' | 'pending';
-  technicianName: string;
-  notes: string;
-}
-
-const SAMPLE_WARRANTIES_AR: Omit<WarrantyData, 'id'>[] = [
-  {
-    code: 'STC-2026-9921',
-    customerName: 'أحمد محمود',
-    serviceType: 'مكافحة حشرات المنازل والفلل',
-    propertyAddress: 'التجمع الخامس، القاهرة الجديدة',
-    issueDate: '2026-01-15',
-    expiryDate: '2027-01-15',
-    status: 'active',
-    technicianName: 'مهندس المكافحة والعمليات',
-    notes: 'تمت المعالجة الشاملة باستخدام الجل الألماني والرش الموجه بدون روائح. ضمان ساري لمدة عام كامل.',
-  },
-  {
-    code: 'STC-2026-7734',
-    customerName: 'د. طارق سامي',
-    serviceType: 'مكافحة النمل الأبيض (الأرضة)',
-    propertyAddress: 'مدينة نصر، القاهرة',
-    issueDate: '2026-02-10',
-    expiryDate: '2027-02-10',
-    status: 'active',
-    technicianName: 'أخصائي المعاينة والرش الفني',
-    notes: 'تم حقن الأرضيات وحلوق الأبواب بمبيدات ممتدة المفعول لحماية الهيكل والباركيه.',
-  },
-  {
-    code: 'STC-2026-5512',
-    customerName: 'أم محمد',
-    serviceType: 'مكافحة وإبادة بق الفراش',
-    propertyAddress: 'الشيخ زايد، الجيزة',
-    issueDate: '2025-11-20',
-    expiryDate: '2026-11-20',
-    status: 'active',
-    technicianName: 'مهندس المكافحة والعمليات',
-    notes: 'معالجة مركزة للمراتب والشقوق مع زيارتي متابعة تأكيدية.',
-  },
-];
-
-const SAMPLE_WARRANTIES_EN: Omit<WarrantyData, 'id'>[] = [
-  {
-    code: 'STC-2026-9921',
-    customerName: 'Ahmed Mahmoud',
-    serviceType: 'Residential & Villa Pest Control',
-    propertyAddress: '5th Settlement, New Cairo',
-    issueDate: '2026-01-15',
-    expiryDate: '2027-01-15',
-    status: 'active',
-    technicianName: 'Operations Lead Engineer',
-    notes: 'Comprehensive odorless German gel treatment with 1-year verified warranty coverage.',
-  },
-  {
-    code: 'STC-2026-7734',
-    customerName: 'Dr. Tarek Sami',
-    serviceType: 'Termite Protection & Sub-slab Injection',
-    propertyAddress: 'Nasr City, Cairo',
-    issueDate: '2026-02-10',
-    expiryDate: '2027-02-10',
-    status: 'active',
-    technicianName: 'Field Technical Specialist',
-    notes: 'Targeted injection of door frames and floors to protect woodwork and structure.',
-  },
-  {
-    code: 'STC-2026-5512',
-    customerName: 'Om Mohamed',
-    serviceType: 'Bed Bug Elimination & Thermal Treatment',
-    propertyAddress: 'Sheikh Zayed, Giza',
-    issueDate: '2025-11-20',
-    expiryDate: '2026-11-20',
-    status: 'active',
-    technicianName: 'Operations Lead Engineer',
-    notes: 'Targeted mattress and crevice treatment with two follow-up confirmation visits.',
-  },
-];
+type WarrantyData = Pick<Warranty, 'code' | 'serviceType' | 'issueDate' | 'expiryDate' | 'status'>;
 
 interface WarrantyVerificationSectionProps {
   isStandalonePage?: boolean;
@@ -112,31 +26,8 @@ export default function WarrantyVerificationSection({}: WarrantyVerificationSect
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<WarrantyData | null>(null);
   const [notFound, setNotFound] = useState(false);
-  const [seeding, setSeeding] = useState(false);
-  const [seedSuccess, setSeedSuccess] = useState(false);
+  const [lookupError, setLookupError] = useState(false);
   const { t, isRTL, locale } = useLanguage();
-
-  const sampleWarranties = locale === 'en' ? SAMPLE_WARRANTIES_EN : SAMPLE_WARRANTIES_AR;
-
-  // Auto seed samples if database is empty or on first load helper
-  const handleSeedSamples = async () => {
-    setSeeding(true);
-    try {
-      for (const item of sampleWarranties) {
-        const docRef = doc(db, 'warranties', item.code);
-        await setDoc(docRef, {
-          ...item,
-          createdAt: new Date().toISOString(),
-        });
-      }
-      setSeedSuccess(true);
-      setTimeout(() => setSeedSuccess(false), 4000);
-    } catch (err) {
-      console.error('Error seeding warranties:', err);
-    } finally {
-      setSeeding(false);
-    }
-  };
 
   const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -145,26 +36,20 @@ export default function WarrantyVerificationSection({}: WarrantyVerificationSect
     setLoading(true);
     setResult(null);
     setNotFound(false);
+    setLookupError(false);
 
     try {
-      const q = query(
-        collection(db, 'warranties'),
-        where('code', '==', code.trim().toUpperCase())
-      );
-      const querySnapshot = await getDocs(q);
-
-      if (!querySnapshot.empty) {
-        const docSnap = querySnapshot.docs[0];
-        setResult({
-          id: docSnap.id,
-          ...docSnap.data(),
-        } as WarrantyData);
-      } else {
+      const res = await fetch(`/api/warranty?code=${encodeURIComponent(code.trim())}`);
+      if (res.status === 404) {
         setNotFound(true);
+        return;
       }
-    } catch (err) {
-      console.error('Error verifying warranty:', err);
-      setNotFound(true);
+      if (!res.ok) throw new Error(`Warranty lookup failed (${res.status})`);
+      const { certificate } = await res.json();
+      setResult(certificate);
+    } catch (error) {
+      console.error('Error verifying warranty:', error);
+      setLookupError(true);
     } finally {
       setLoading(false);
     }
@@ -281,20 +166,6 @@ export default function WarrantyVerificationSection({}: WarrantyVerificationSect
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <div className="p-4 rounded-2xl bg-[#F6F8F5] border border-gray-100 flex items-start gap-3">
                     <div className="w-10 h-10 rounded-xl bg-[#033F2D] text-[#C7F268] flex items-center justify-center shrink-0">
-                      <User className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <span className="text-xs text-gray-500 font-bold block">
-                        {t.warrantyCustomerLabel}
-                      </span>
-                      <p className="text-base font-bold text-[#033F2D] mt-0.5">
-                        {result.customerName}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="p-4 rounded-2xl bg-[#F6F8F5] border border-gray-100 flex items-start gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-[#033F2D] text-[#C7F268] flex items-center justify-center shrink-0">
                       <Wrench className="w-5 h-5" />
                     </div>
                     <div>
@@ -303,20 +174,6 @@ export default function WarrantyVerificationSection({}: WarrantyVerificationSect
                       </span>
                       <p className="text-base font-bold text-[#033F2D] mt-0.5">
                         {result.serviceType}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="p-4 rounded-2xl bg-[#F6F8F5] border border-gray-100 flex items-start gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-[#033F2D] text-[#C7F268] flex items-center justify-center shrink-0">
-                      <MapPin className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <span className="text-xs text-gray-500 font-bold block">
-                        {t.warrantyAddressLabel}
-                      </span>
-                      <p className="text-base font-bold text-[#033F2D] mt-0.5">
-                        {result.propertyAddress}
                       </p>
                     </div>
                   </div>
@@ -336,30 +193,20 @@ export default function WarrantyVerificationSection({}: WarrantyVerificationSect
                   </div>
                 </div>
 
-                {result.notes && (
-                  <div className="p-4 rounded-2xl bg-[#033F2D]/5 border border-[#033F2D]/10">
-                    <span className="text-xs font-bold text-[#033F2D] block mb-1">
-                      {t.warrantyNotesLabel}:
-                    </span>
-                    <p className="text-sm text-[#484C44] leading-relaxed">{result.notes}</p>
-                  </div>
-                )}
-
-                <div className="pt-4 border-t border-gray-100 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-gray-500">
-                  <div className="flex items-center gap-2">
-                    <span className="font-bold text-[#033F2D]">
-                      {t.warrantyTechnicianLabel}:
-                    </span>
-                    <span className="font-semibold text-gray-700">{result.technicianName}</span>
-                  </div>
+                <div className="pt-4 border-t border-gray-100">
                   <div className="bg-[#C7F268]/20 text-[#033F2D] px-4 py-2 rounded-xl font-bold border border-[#C7F268]">
-                    ✓ {locale === 'en' ? 'Verified in Firestore Database' : 'موثق رسمياً في قاعدة بيانات Firebase'}
+                    ✓ {locale === 'en' ? 'Verified in the warranty database' : 'موثق رسميًا في قاعدة بيانات الضمان'}
                   </div>
                 </div>
               </div>
             </motion.div>
           )}
 
+          {lookupError && (
+            <p role="alert" className="rounded-xl bg-amber-50 p-4 text-center text-amber-900">
+              {locale === 'en' ? 'Could not verify the warranty. Please try again.' : 'تعذّر التحقق من الضمان. حاول مرة أخرى.'}
+            </p>
+          )}
           {notFound && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
