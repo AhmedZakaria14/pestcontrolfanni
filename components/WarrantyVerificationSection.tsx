@@ -160,33 +160,11 @@ export default function WarrantyVerificationSection({}: WarrantyVerificationSect
           ...docSnap.data(),
         } as WarrantyData);
       } else {
-        // Fallback check against local sample data if offline
-        const localMatch = sampleWarranties.find(
-          (w) => w.code.toUpperCase() === code.trim().toUpperCase()
-        );
-        if (localMatch) {
-          setResult({
-            id: localMatch.code,
-            ...localMatch,
-          });
-        } else {
-          setNotFound(true);
-        }
+        setNotFound(true);
       }
     } catch (err) {
       console.error('Error verifying warranty:', err);
-      // Fallback check against local sample data
-      const localMatch = sampleWarranties.find(
-        (w) => w.code.toUpperCase() === code.trim().toUpperCase()
-      );
-      if (localMatch) {
-        setResult({
-          id: localMatch.code,
-          ...localMatch,
-        });
-      } else {
-        setNotFound(true);
-      }
+      setNotFound(true);
     } finally {
       setLoading(false);
     }
@@ -211,28 +189,6 @@ export default function WarrantyVerificationSection({}: WarrantyVerificationSect
           <p className="text-[#484C44] text-base max-w-2xl mx-auto leading-relaxed">
             {t.warrantyDesc}
           </p>
-
-          <div className="pt-2 flex flex-wrap items-center justify-center gap-3">
-            <button
-              onClick={handleSeedSamples}
-              disabled={seeding}
-              className="text-xs bg-[#033F2D] text-[#C7F268] px-4 py-2 rounded-xl font-bold inline-flex items-center gap-2 shadow-sm hover:bg-[#064E3B] transition-colors cursor-pointer"
-            >
-              <RefreshCw className={`w-3.5 h-3.5 ${seeding ? 'animate-spin' : ''}`} />
-              <span>
-                {seeding
-                  ? locale === 'en'
-                    ? 'Syncing test database...'
-                    : 'جاري تهيئة قاعدة البيانات...'
-                  : t.warrantySeedBtn}
-              </span>
-            </button>
-            {seedSuccess && (
-              <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-200">
-                {t.warrantySeedSuccess}
-              </span>
-            )}
-          </div>
         </div>
 
         {/* Search Box */}
@@ -277,25 +233,6 @@ export default function WarrantyVerificationSection({}: WarrantyVerificationSect
               )}
             </button>
           </form>
-
-          {/* Quick Demo Badges */}
-          <div className="mt-4 pt-4 border-t border-gray-100 flex flex-wrap items-center gap-2 text-xs text-gray-500">
-            <span className="font-bold text-[#033F2D]">
-              {locale === 'en' ? 'Quick test codes:' : 'أكواد تجريبية للاختبار السريع:'}
-            </span>
-            {sampleWarranties.map((item) => (
-              <button
-                key={item.code}
-                type="button"
-                onClick={() => {
-                  setCode(item.code);
-                }}
-                className="bg-gray-100 hover:bg-[#033F2D] hover:text-[#C7F268] text-[#033F2D] px-3 py-1.5 rounded-lg font-mono font-bold transition-colors cursor-pointer"
-              >
-                {item.code}
-              </button>
-            ))}
-          </div>
         </div>
 
         {/* Results Display */}

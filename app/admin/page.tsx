@@ -38,6 +38,8 @@ import {
   fetchWarrantiesFromFirestore,
   saveWarrantyToFirestore,
   deleteWarrantyFromFirestore,
+  subscribeToBookings,
+  subscribeToWarranties,
 } from '@/lib/firebase';
 
 export default function AdminDashboardPage() {
@@ -126,21 +128,38 @@ export default function AdminDashboardPage() {
     await Promise.all([loadBookings(), loadWarranties()]);
   };
 
-  // Fetch Data when authenticated
+  // Real-time Firestore subscriptions when authenticated
   useEffect(() => {
-    let isMounted = true;
-    if (isAuthenticated) {
-      Promise.all([fetchBookingsFromFirestore(), fetchWarrantiesFromFirestore()])
-        .then(([bData, wData]) => {
-          if (isMounted) {
-            setBookings(bData || []);
-            setWarranties(wData || []);
-          }
-        })
-        .catch((err) => console.error('Fetch error:', err));
-    }
+    if (!isAuthenticated) return;
+
+    setLoadingBookings(true);
+    setLoadingWarranties(true);
+
+    const unsubscribeBookings = subscribeToBookings(
+      (bData) => {
+        setBookings(bData);
+        setLoadingBookings(false);
+      },
+      (err) => {
+        console.error('Bookings subscription error:', err);
+        setLoadingBookings(false);
+      }
+    );
+
+    const unsubscribeWarranties = subscribeToWarranties(
+      (wData) => {
+        setWarranties(wData);
+        setLoadingWarranties(false);
+      },
+      (err) => {
+        console.error('Warranties subscription error:', err);
+        setLoadingWarranties(false);
+      }
+    );
+
     return () => {
-      isMounted = false;
+      unsubscribeBookings();
+      unsubscribeWarranties();
     };
   }, [isAuthenticated]);
 

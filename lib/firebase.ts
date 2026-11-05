@@ -135,6 +135,28 @@ export async function fetchBookingsFromFirestore(): Promise<FirebaseBooking[]> {
   }
 }
 
+export function subscribeToBookings(
+  onData: (bookings: FirebaseBooking[]) => void,
+  onError?: (err: unknown) => void
+) {
+  const q = query(collection(db, 'bookings'));
+  return onSnapshot(
+    q,
+    (snapshot) => {
+      const bookings: FirebaseBooking[] = [];
+      snapshot.forEach((d) => {
+        bookings.push({ id: d.id, ...d.data() } as FirebaseBooking);
+      });
+      bookings.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
+      onData(bookings);
+    },
+    (error) => {
+      if (onError) onError(error);
+      else console.error('Error listening to bookings:', error);
+    }
+  );
+}
+
 export async function updateBookingStatusInFirestore(
   bookingId: string,
   newStatus: FirebaseBooking['status']
@@ -200,6 +222,28 @@ export async function fetchWarrantiesFromFirestore(): Promise<FirebaseWarranty[]
   } catch (error) {
     handleFirestoreError(error, OperationType.LIST, path);
   }
+}
+
+export function subscribeToWarranties(
+  onData: (warranties: FirebaseWarranty[]) => void,
+  onError?: (err: unknown) => void
+) {
+  const q = query(collection(db, 'warranties'));
+  return onSnapshot(
+    q,
+    (snapshot) => {
+      const warranties: FirebaseWarranty[] = [];
+      snapshot.forEach((d) => {
+        warranties.push({ id: d.id, ...d.data() } as FirebaseWarranty);
+      });
+      warranties.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
+      onData(warranties);
+    },
+    (error) => {
+      if (onError) onError(error);
+      else console.error('Error listening to warranties:', error);
+    }
+  );
 }
 
 export async function deleteWarrantyFromFirestore(code: string): Promise<void> {
