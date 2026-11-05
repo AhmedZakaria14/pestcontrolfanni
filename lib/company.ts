@@ -28,9 +28,9 @@ export const COMPANY_AR: CompanyInfo = {
   phonePrimaryRaw: 'tel:01000989063',
   phoneSecondary: '01000989064',
   phoneSecondaryRaw: 'tel:01000989064',
-  whatsapp: '01000989063',
+  whatsapp: '01033314613',
   whatsappNumber: '201000989063',
-  whatsappUrl: 'https://wa.me/201000989063',
+  whatsappUrl: 'https://wa.me/201033314613',
   workingHours: 'خدمة متواصلة يومياً لتلقي طلبات الحجز والمكافحة',
   coverage: 'تغطية شاملة للقاهرة الكبرى والجيزة ومحافظات جمهورية مصر العربية',
 };
@@ -47,9 +47,9 @@ export const COMPANY_EN: CompanyInfo = {
   phonePrimaryRaw: 'tel:01000989063',
   phoneSecondary: '01000989064',
   phoneSecondaryRaw: 'tel:01000989064',
-  whatsapp: '01000989063',
+  whatsapp: '01033314613',
   whatsappNumber: '201000989063',
-  whatsappUrl: 'https://wa.me/201000989063',
+  whatsappUrl: 'https://wa.me/201033314613',
   workingHours: 'Daily 24/7 service for booking & pest control requests',
   coverage: 'Full coverage across Greater Cairo, Giza, and all governorates of Egypt',
 };
