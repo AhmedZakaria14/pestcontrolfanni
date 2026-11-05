@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import {
   ShieldCheck,
@@ -32,15 +32,13 @@ import { useLanguage } from '@/lib/i18n';
 import {
   FirebaseBooking,
   FirebaseWarranty,
-  fetchBookingsFromFirestore,
-  updateBookingStatusInFirestore,
-  deleteBookingFromFirestore,
   fetchWarrantiesFromFirestore,
   saveWarrantyToFirestore,
   deleteWarrantyFromFirestore,
-  subscribeToBookings,
   subscribeToWarranties,
 } from '@/lib/firebase';
+
+type AdminBooking = FirebaseBooking & { storage: 'firestore' | 'cloudsql' };
 
 export default function AdminDashboardPage() {
   const { locale, isRTL } = useLanguage();
@@ -59,10 +57,12 @@ export default function AdminDashboardPage() {
   const [activeTab, setActiveTab] = useState<'bookings' | 'warranties'>('bookings');
 
   // Bookings Data & Filter
-  const [bookings, setBookings] = useState<FirebaseBooking[]>([]);
+  const [bookings, setBookings] = useState<AdminBooking[]>([]);
   const [bookingSearch, setBookingSearch] = useState('');
   const [bookingStatusFilter, setBookingStatusFilter] = useState<string>('all');
   const [loadingBookings, setLoadingBookings] = useState(false);
+  const [bookingLoadError, setBookingLoadError] = useState<'partial' | 'failed' | null>(null);
+  const bookingsRequest = useRef(0);
 
   // Warranties Data & Filter
   const [warranties, setWarranties] = useState<FirebaseWarranty[]>([]);
@@ -100,30 +100,22 @@ export default function AdminDashboardPage() {
     setTimeout(() => setNotification(null), 3500);
   };
 
-  const loadBookings = useCallback(async () => {
-    setLoadingBookings(true);
-    let loaded = false;
+  const loadBookings = useCallback(async (showLoading = true) => {
+    const request = ++bookingsRequest.current;
+    if (showLoading) setLoadingBookings(true);
     try {
-      const res = await fetch('/api/bookings');
-      if (res.ok) {
-        const json = await res.json();
-        if (json.success && Array.isArray(json.data) && json.data.length > 0) {
-          setBookings(json.data);
-          loaded = true;
-        }
-      }
-    } catch (apiErr) {
-      console.warn('API load bookings fallback:', apiErr);
+      const res = await fetch('/api/bookings', { cache: 'no-store' });
+      if (!res.ok) throw new Error(`Booking list request failed (${res.status})`);
+      const result = await res.json();
+      if (request !== bookingsRequest.current) return;
+      setBookings(result.data);
+      setBookingLoadError(result.partial ? 'partial' : null);
+    } catch (err) {
+      console.error('Failed to load bookings:', err);
+      if (request === bookingsRequest.current) setBookingLoadError('failed');
+    } finally {
+      if (request === bookingsRequest.current) setLoadingBookings(false);
     }
-    if (!loaded) {
-      try {
-        const data = await fetchBookingsFromFirestore();
-        setBookings(data || []);
-      } catch (err) {
-        console.error('Failed to load bookings:', err);
-      }
-    }
-    setLoadingBookings(false);
   }, []);
 
   const loadWarranties = useCallback(async () => {
@@ -166,20 +158,7 @@ export default function AdminDashboardPage() {
     };
     init();
 
-    const unsubscribeBookings = subscribeToBookings(
-      (bData) => {
-        // Only update if we have data or if the manual load already finished, 
-        // to avoid overwriting API data with initial empty Firestore state
-        if (bData.length > 0 || !loadingBookings) {
-          setBookings(bData);
-        }
-        setLoadingBookings(false);
-      },
-      (err) => {
-        console.error('Bookings subscription error:', err);
-        setLoadingBookings(false);
-      }
-    );
+    const bookingRefresh = window.setInterval(() => void loadBookings(false), 30_000);
 
     const unsubscribeWarranties = subscribeToWarranties(
       (wData) => {
@@ -196,10 +175,11 @@ export default function AdminDashboardPage() {
 
 
     return () => {
-      unsubscribeBookings();
+      window.clearInterval(bookingRefresh);
+      bookingsRequest.current++;
       unsubscribeWarranties();
     };
-  }, [isAuthenticated, loadAllData]);
+  }, [isAuthenticated, loadAllData, loadBookings]);
 
   // Handle Login
   const handleLogin = (e: React.FormEvent) => {
@@ -224,7 +204,17 @@ export default function AdminDashboardPage() {
   // Update Booking Status
   const handleStatusChange = async (bookingId: string, newStatus: FirebaseBooking['status']) => {
     try {
-      await updateBookingStatusInFirestore(bookingId, newStatus);
+      const res = await fetch('/api/bookings', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: bookingId,
+          status: newStatus,
+          storage: bookings.find((booking) => booking.id === bookingId)?.storage,
+        }),
+      });
+      if (!res.ok) throw new Error(`Booking update failed (${res.status})`);
+      void loadBookings(false);
       setBookings((prev) =>
         prev.map((b) => (b.id === bookingId ? { ...b, status: newStatus } : b))
       );
@@ -242,12 +232,18 @@ export default function AdminDashboardPage() {
   const handleDeleteBooking = async (bookingId: string) => {
     if (!confirm(locale === 'en' ? 'Delete this booking request?' : 'هل تريد حذف طلب الحجز هذا نهائياً؟')) return;
     try {
-      await deleteBookingFromFirestore(bookingId);
+      const params = new URLSearchParams({ id: bookingId });
+      const storage = bookings.find((booking) => booking.id === bookingId)?.storage;
+      if (storage) params.set('storage', storage);
+      const res = await fetch(`/api/bookings?${params}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error(`Booking deletion failed (${res.status})`);
+      void loadBookings(false);
       setBookings((prev) => prev.filter((b) => b.id !== bookingId));
       if (selectedBooking?.id === bookingId) setSelectedBooking(null);
       showToast(locale === 'en' ? 'Booking deleted' : 'تم حذف طلب الحجز بنجاح');
     } catch (err) {
       console.error('Error deleting booking:', err);
+      showToast(locale === 'en' ? 'Failed to delete booking' : 'تعذّر حذف طلب الحجز');
     }
   };
 
@@ -596,6 +592,14 @@ export default function AdminDashboardPage() {
               </div>
             </div>
 
+            {bookingLoadError && (
+              <p role="alert" className="mb-3 rounded-lg bg-amber-50 p-3 text-sm text-amber-900">
+                {bookingLoadError === 'partial'
+                  ? (locale === 'en' ? 'Some bookings could not be loaded.' : 'تعذّر تحميل بعض الحجوزات.')
+                  : (locale === 'en' ? 'Could not refresh bookings. Try again.' : 'تعذّر تحديث قائمة الحجوزات. حاول مرة أخرى.')}
+              </p>
+            )}
+
             {/* Bookings Table / List */}
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
               {loadingBookings ? (
@@ -608,7 +612,7 @@ export default function AdminDashboardPage() {
                   <CalendarCheck className="w-12 h-12 mx-auto text-gray-300 mb-2" />
                   <p className="text-base font-bold">لا توجد طلبات حجز مطابقة للبحث</p>
                   <p className="text-xs text-gray-400 mt-1">
-                    أي طلبات جديدة يتم إرسالها من نماذج الموقع تظهر هنا لحظياً في قاعدة البيانات.
+                    تتحدّث قائمة طلبات الحجز تلقائيًا كل 30 ثانية.
                   </p>
                 </div>
               ) : (

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { X, CheckCircle2, PhoneCall, ArrowLeft, ArrowRight, MessageCircle } from 'lucide-react';
 import { useLanguage } from '@/lib/i18n';
-import { saveBookingToFirestore } from '@/lib/firebase';
+import { useBookingSubmission } from '@/hooks/useBookingSubmission';
 
 interface BookingModalProps {
   isOpen: boolean;
@@ -32,25 +32,21 @@ export default function BookingModal({
   });
   const [submitted, setSubmitted] = useState(false);
 
+  const { submit, isSubmitting, error: bookingError } = useBookingSubmission(locale);
+
   if (!isOpen) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!(await submit({
+      name: formData.name,
+      phone: formData.phone,
+      service: formData.service,
+      area: formData.area,
+      notes: formData.notes,
+      source: 'Popup Booking Modal',
+    }))) return;
     setSubmitted(true);
-
-    // Save directly to real Firebase Firestore & Cloud SQL
-    try {
-      await saveBookingToFirestore({
-        name: formData.name,
-        phone: formData.phone,
-        service: formData.service,
-        area: formData.area,
-        notes: formData.notes,
-        source: 'Popup Booking Modal',
-      });
-    } catch (err) {
-      console.warn('Booking saved locally/fallback if offline:', err);
-    }
   };
 
   return (
@@ -126,6 +122,7 @@ export default function BookingModal({
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
+              {bookingError && <p role="alert" className="text-sm text-red-500">{bookingError}</p>}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-bold text-[#033F2D] tracking-wider mb-1">
@@ -225,6 +222,7 @@ export default function BookingModal({
                 </span>
                 <button
                   type="submit"
+                  disabled={isSubmitting}
                   className="bg-[#C7F268] hover:bg-[#b5e050] text-[#033F2D] font-bold py-2.5 px-6 rounded-xl text-sm w-full sm:w-auto order-1 sm:order-2 flex items-center justify-center gap-2 cursor-pointer transition-all shadow-md"
                 >
                   <span>{t.bookingSubmitBtn}</span>

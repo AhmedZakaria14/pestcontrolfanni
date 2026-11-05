@@ -7,7 +7,7 @@ import Footer from '@/components/Footer';
 import PageBanner from '@/components/PageBanner';
 import { Phone, MapPin, CheckCircle2, Send, ShieldCheck, MessageCircle, Clock } from 'lucide-react';
 import { useLanguage } from '@/lib/i18n';
-import { saveBookingToFirestore } from '@/lib/firebase';
+import { useBookingSubmission } from '@/hooks/useBookingSubmission';
 
 export default function ContactUsPage() {
   const { t, company, siteData, isRTL, locale, dir } = useLanguage();
@@ -20,23 +20,19 @@ export default function ContactUsPage() {
     message: '',
   });
 
+  const { submit, isSubmitting, error: bookingError } = useBookingSubmission(locale);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!(await submit({
+      name: formData.name,
+      phone: formData.phone,
+      area: formData.area,
+      service: formData.service,
+      notes: formData.message,
+      source: 'Contact Us Page Form',
+    }))) return;
     setSubmitted(true);
-
-    // Save directly to real Firebase Firestore & Cloud SQL
-    try {
-      await saveBookingToFirestore({
-        name: formData.name,
-        phone: formData.phone,
-        area: formData.area,
-        service: formData.service,
-        notes: formData.message,
-        source: 'Contact Us Page Form',
-      });
-    } catch (err) {
-      console.warn('Booking saved locally/fallback:', err);
-    }
   };
 
   return (
@@ -173,6 +169,7 @@ export default function ContactUsPage() {
                   </div>
                 ) : (
                   <form onSubmit={handleSubmit} className="space-y-4">
+                    {bookingError && <p role="alert" className="text-sm text-red-500">{bookingError}</p>}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
                         <label className="block text-xs font-bold text-[#033F2D] mb-1">
@@ -269,6 +266,7 @@ export default function ContactUsPage() {
                     <div className="pt-2 flex flex-col sm:flex-row items-center gap-3">
                       <button
                         type="submit"
+                        disabled={isSubmitting}
                         className="bg-[#C7F268] hover:bg-[#b5e050] text-[#033F2D] py-3.5 px-8 font-bold text-sm rounded-xl cursor-pointer w-full sm:w-auto inline-flex items-center justify-center gap-2 shadow-md transition-all hover:scale-[1.01]"
                       >
                         <Send className="w-4 h-4" />

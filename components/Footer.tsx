@@ -6,28 +6,24 @@ import Link from 'next/link';
 import { Phone, ArrowLeft, ArrowRight, CheckCircle2, MessageCircle, MapPin } from 'lucide-react';
 import Logo from '@/components/Logo';
 import { useLanguage } from '@/lib/i18n';
-import { saveBookingToFirestore } from '@/lib/firebase';
+import { useBookingSubmission } from '@/hooks/useBookingSubmission';
 
 export default function Footer() {
   const [inquiryPhone, setInquiryPhone] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const { t, company, siteData, isRTL, locale } = useLanguage();
 
+  const { submit, isSubmitting, error: bookingError } = useBookingSubmission(locale);
+
   const handleInquiry = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!inquiryPhone) return;
-
-    // Save directly to real Firebase Firestore & Cloud SQL
-    try {
-      await saveBookingToFirestore({
-        name: 'حجز واستفسار سريع (الفوتر)',
-        phone: inquiryPhone,
-        service: 'حجز خدمة مكافحة سريع',
-        source: 'Footer Quick Callback',
-      });
-    } catch (err) {
-      console.warn('Inquiry saved locally/fallback:', err);
-    }
+    if (!(await submit({
+      name: 'حجز واستفسار سريع (الفوتر)',
+      phone: inquiryPhone,
+      service: 'حجز خدمة مكافحة سريع',
+      source: 'Footer Quick Callback',
+    }))) return;
 
     setSubmitted(true);
     setTimeout(() => {
@@ -234,6 +230,7 @@ export default function Footer() {
             </p>
 
             <form onSubmit={handleInquiry} className="space-y-3">
+              {bookingError && <p role="alert" className="text-sm text-red-500">{bookingError}</p>}
               <div className="relative">
                 <input
                   type="tel"
@@ -249,6 +246,7 @@ export default function Footer() {
               </div>
               <button
                 type="submit"
+                disabled={isSubmitting}
                 className="w-full bg-[#C7F268] hover:bg-[#b5e050] text-[#033F2D] rounded-xl py-3 text-sm flex items-center justify-center gap-2 font-bold cursor-pointer transition-all shadow-md"
               >
                 <span>{t.footerInquirySubmit}</span>

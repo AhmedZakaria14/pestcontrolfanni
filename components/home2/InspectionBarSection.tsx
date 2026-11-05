@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Phone, CheckCircle2, MessageCircle } from 'lucide-react';
 import { useLanguage } from '@/lib/i18n';
 import ScrollReveal from '@/components/animations/ScrollReveal';
-import { saveBookingToFirestore } from '@/lib/firebase';
+import { useBookingSubmission } from '@/hooks/useBookingSubmission';
 
 export default function InspectionBarSection() {
   const { t, company, siteData, isRTL, locale } = useLanguage();
@@ -17,22 +17,18 @@ export default function InspectionBarSection() {
   });
   const [success, setSuccess] = useState(false);
 
+  const { submit, isSubmitting, error: bookingError } = useBookingSubmission(locale);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!(await submit({
+      name: formData.name,
+      phone: formData.phone,
+      service: formData.service,
+      area: formData.area,
+      source: 'Home Inspection Bar',
+    }))) return;
     setSuccess(true);
-
-    // Save directly to real Firebase Firestore & Cloud SQL
-    try {
-      await saveBookingToFirestore({
-        name: formData.name,
-        phone: formData.phone,
-        service: formData.service,
-        area: formData.area,
-        source: 'Home Inspection Bar',
-      });
-    } catch (err) {
-      console.warn('Booking saved locally/fallback if offline:', err);
-    }
   };
 
   return (
@@ -102,6 +98,7 @@ export default function InspectionBarSection() {
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-3">
+                  {bookingError && <p role="alert" className="text-sm text-red-500">{bookingError}</p>}
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
                     <div>
                       <label className="block text-xs font-bold text-[#033F2D] mb-1">
@@ -181,6 +178,7 @@ export default function InspectionBarSection() {
                   <div className={`flex ${isRTL ? 'justify-end' : 'justify-start'} pt-1`}>
                     <button
                       type="submit"
+                      disabled={isSubmitting}
                       className="bg-[#033F2D] hover:bg-[#022A1E] text-white py-2.5 px-6 rounded-xl font-bold text-sm shadow-md cursor-pointer inline-flex items-center gap-1.5 transition-colors"
                     >
                       <span>{t.inspBarSubmitBtn}</span>
