@@ -47,7 +47,7 @@ import {
 } from '@/lib/pestData';
 import BookingModal from './BookingModal';
 import { useLanguage } from '@/lib/i18n';
-import { saveBookingToFirestore } from '@/lib/firebase';
+import { useBookingSubmission } from '@/hooks/useBookingSubmission';
 
 const iconMap: Record<string, any> = {
   UtensilsCrossed,
@@ -136,21 +136,18 @@ export default function PestIdentifierTool() {
     }
   };
 
+  const { submit, isSubmitting, error: bookingError } = useBookingSubmission(locale);
+
   const handleUploadSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!(await submit({
+      name: userName || 'عميل - صورة حشرة',
+      phone: userPhone,
+      service: 'تشخيص حشرة من صورة مرفقة',
+      notes: 'طلب تشخيص مجاني عبر رفع صورة الحشرة',
+      source: 'Photo Upload Identification Tool',
+    }))) return;
     setUploadSubmitted(true);
-    
-    try {
-      await saveBookingToFirestore({
-        name: userName || 'عميل - صورة حشرة',
-        phone: userPhone,
-        service: 'تشخيص حشرة من صورة مرفقة',
-        notes: 'طلب تشخيص مجاني عبر رفع صورة الحشرة',
-        source: 'Photo Upload Identification Tool',
-      });
-    } catch (err) {
-      console.warn('Photo booking save fallback:', err);
-    }
   };
 
   // Filtered encyclopedia pests
@@ -738,6 +735,7 @@ export default function PestIdentifierTool() {
 
           {!uploadSubmitted ? (
             <form onSubmit={handleUploadSubmit} className="space-y-5">
+              {bookingError && <p role="alert" className="text-sm text-red-500">{bookingError}</p>}
               {/* Image drop area */}
               <div className="border-2 border-dashed border-gray-300 hover:border-[#033F2D] rounded-2xl p-6 text-center transition-colors relative cursor-pointer bg-[#F4F6F4]/50">
                 <input
@@ -816,6 +814,7 @@ export default function PestIdentifierTool() {
 
               <button
                 type="submit"
+                disabled={isSubmitting}
                 className="w-full bg-[#C7F268] hover:bg-[#b5e050] text-[#033F2D] py-4 rounded-xl text-base font-bold text-center justify-center cursor-pointer shadow-lg inline-flex items-center gap-2 transition-all hover:scale-[1.01]"
               >
                 <span>

@@ -1,165 +1,123 @@
+import { randomUUID } from 'node:crypto';
 import { NextRequest, NextResponse } from 'next/server';
 import { sqlDb } from '@/src/db';
 import { bookings } from '@/src/db/schema';
-import { eq, desc } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 import {
   saveBookingToFirestore,
   fetchBookingsFromFirestore,
   updateBookingStatusInFirestore,
   deleteBookingFromFirestore,
+  type FirebaseBooking,
 } from '@/lib/firebase';
 
+const statuses = new Set(['new', 'contacted', 'scheduled', 'completed', 'cancelled']);
+const sqlConfigured = () => Boolean(process.env.SQL_HOST && process.env.SQL_USER);
+const clean = (value: unknown) => typeof value === 'string' ? value.trim() : '';
+const validId = (id: string) => /^[a-zA-Z0-9_-]{1,128}$/.test(id);
+
+function failed(error: string, status: number) {
+  return NextResponse.json({ success: false, error }, { status });
+}
+
 export async function GET() {
-  try {
-    if (process.env.SQL_HOST && process.env.SQL_USER) {
-      const sqlResults = await sqlDb
-        .select()
-        .from(bookings)
-        .orderBy(desc(bookings.createdAt));
-      
-      if (sqlResults.length > 0) {
-        return NextResponse.json({ success: true, source: 'cloudsql', data: sqlResults });
-      }
-    }
-  } catch (err) {
-    console.warn('Cloud SQL GET bookings fallback to Firestore:', err);
+  const [firestore, sql] = await Promise.allSettled([
+    fetchBookingsFromFirestore(),
+    sqlConfigured() ? sqlDb.select().from(bookings) : Promise.resolve([]),
+  ]);
+
+  if (firestore.status === 'rejected') console.error('Booking Firestore read failed:', firestore.reason);
+  if (sql.status === 'rejected') console.error('Legacy booking SQL read failed:', sql.reason);
+  if (firestore.status === 'rejected' && (sql.status === 'rejected' || !sqlConfigured())) {
+    return failed('Could not load bookings', 503);
   }
 
-  // Fallback to Firestore
-  try {
-    const fsResults = await fetchBookingsFromFirestore();
-    return NextResponse.json({ success: true, source: 'firestore', data: fsResults });
-  } catch (err) {
-    return NextResponse.json({ success: false, error: String(err) }, { status: 500 });
+  const data = new Map<string, FirebaseBooking & { storage: 'cloudsql' | 'firestore' }>();
+  if (sql.status === 'fulfilled') {
+    for (const row of sql.value) {
+      data.set(row.id, {
+        ...row,
+        area: row.area ?? undefined,
+        notes: row.notes ?? undefined,
+        source: row.source ?? undefined,
+        status: row.status as FirebaseBooking['status'],
+        createdAt: row.createdAt?.toISOString() ?? '',
+        updatedAt: row.updatedAt?.toISOString(),
+        storage: 'cloudsql',
+      });
+    }
   }
+  if (firestore.status === 'fulfilled') {
+    for (const booking of firestore.value) data.set(booking.id, { ...booking, storage: 'firestore' });
+  }
+
+  return NextResponse.json({
+    success: true,
+    partial: firestore.status === 'rejected' || sql.status === 'rejected',
+    data: [...data.values()].sort((a, b) => b.createdAt.localeCompare(a.createdAt)),
+  }, { headers: { 'Cache-Control': 'private, no-store' } });
 }
 
 export async function POST(req: NextRequest) {
+  const body = await req.json().catch(() => null);
+  const phone = clean(body?.phone);
+  const id = body?.id === undefined ? `book-${randomUUID()}` : clean(body.id);
+  if (!phone || !validId(id)) return failed('Invalid phone or booking ID', 400);
+
   try {
-    const body = await req.json();
-    const bookingId = body.id || `book-${Date.now()}-${Math.floor(100 + Math.random() * 900)}`;
-    const now = new Date();
-
-    const newBooking = {
-      id: bookingId,
-      name: body.name?.trim() || 'عميل بدون اسم',
-      phone: body.phone?.trim() || '',
-      service: body.service || 'حجز فحص ومكافحة شاملة',
-      area: body.area?.trim() || '',
-      notes: body.notes?.trim() || '',
-      status: body.status || 'new',
-      source: body.source || 'Website Booking Form',
-      createdAt: now,
-      updatedAt: now,
-    };
-
-
-    // Save to Cloud SQL if available
-    let savedInSql = false;
-    try {
-      if (process.env.SQL_HOST && process.env.SQL_USER) {
-        await sqlDb.insert(bookings).values(newBooking);
-        savedInSql = true;
-      }
-    } catch (sqlErr) {
-      console.error('Cloud SQL insert error:', sqlErr);
-    }
-
-    // Save to Firestore
-    try {
-      await saveBookingToFirestore({
-        name: newBooking.name,
-        phone: newBooking.phone,
-        service: newBooking.service,
-        area: newBooking.area,
-        notes: newBooking.notes,
-        status: newBooking.status as any,
-        source: newBooking.source,
-      });
-    } catch (fsErr) {
-      console.warn('Firestore mirror insert error:', fsErr);
-    }
-
-    return NextResponse.json({
-      success: true,
-      savedInSql,
-      booking: newBooking,
+    const booking = await saveBookingToFirestore({
+      id,
+      name: clean(body.name) || 'عميل بدون اسم',
+      phone,
+      service: clean(body.service),
+      area: clean(body.area),
+      notes: clean(body.notes),
+      source: clean(body.source),
     });
+    return NextResponse.json({ success: true, id: booking.id });
   } catch (error) {
-    console.error('Error creating booking API:', error);
-    return NextResponse.json(
-      { success: false, error: error instanceof Error ? error.message : String(error) },
-      { status: 500 }
-    );
+    console.error('Booking write failed:', error);
+    return failed('Could not save booking', 503);
   }
 }
 
 export async function PATCH(req: NextRequest) {
+  const body = await req.json().catch(() => null);
+  const id = clean(body?.id);
+  const status = clean(body?.status);
+  if (!validId(id) || !statuses.has(status)) return failed('Invalid booking ID or status', 400);
+
   try {
-    const { id, status } = await req.json();
-    if (!id || !status) {
-      return NextResponse.json({ success: false, error: 'Missing id or status' }, { status: 400 });
+    if (body.storage === 'cloudsql') {
+      if (!sqlConfigured()) return failed('Legacy booking storage is unavailable', 503);
+      const [updated] = await sqlDb.update(bookings)
+        .set({ status, updatedAt: new Date() }).where(eq(bookings.id, id)).returning({ id: bookings.id });
+      if (!updated) return failed('Booking not found', 404);
+    } else {
+      await updateBookingStatusInFirestore(id, status as FirebaseBooking['status']);
     }
-
-    const now = new Date();
-
-    // Update Cloud SQL
-    try {
-      if (process.env.SQL_HOST && process.env.SQL_USER) {
-        await sqlDb
-          .update(bookings)
-          .set({ status, updatedAt: now })
-          .where(eq(bookings.id, id));
-      }
-    } catch (sqlErr) {
-      console.warn('Cloud SQL update status error:', sqlErr);
-    }
-
-    // Update Firestore
-    try {
-      await updateBookingStatusInFirestore(id, status);
-    } catch (fsErr) {
-      console.warn('Firestore status update error:', fsErr);
-    }
-
     return NextResponse.json({ success: true, id, status });
   } catch (error) {
-    return NextResponse.json(
-      { success: false, error: error instanceof Error ? error.message : String(error) },
-      { status: 500 }
-    );
+    console.error('Booking status update failed:', error);
+    return failed('Could not update booking', 503);
   }
 }
 
 export async function DELETE(req: NextRequest) {
+  const { searchParams } = new URL(req.url);
+  const id = searchParams.get('id') ?? '';
+  if (!validId(id)) return failed('Invalid booking ID', 400);
+
   try {
-    const { searchParams } = new URL(req.url);
-    const id = searchParams.get('id');
-    if (!id) {
-      return NextResponse.json({ success: false, error: 'Missing id parameter' }, { status: 400 });
-    }
-
-    // Delete Cloud SQL
-    try {
-      if (process.env.SQL_HOST && process.env.SQL_USER) {
-        await sqlDb.delete(bookings).where(eq(bookings.id, id));
-      }
-    } catch (sqlErr) {
-      console.warn('Cloud SQL delete error:', sqlErr);
-    }
-
-    // Delete Firestore
-    try {
+    if (searchParams.get('storage') === 'cloudsql') {
+      if (!sqlConfigured()) return failed('Legacy booking storage is unavailable', 503);
+      await sqlDb.delete(bookings).where(eq(bookings.id, id));
+    } else {
       await deleteBookingFromFirestore(id);
-    } catch (fsErr) {
-      console.warn('Firestore delete error:', fsErr);
     }
-
     return NextResponse.json({ success: true, deletedId: id });
   } catch (error) {
-    return NextResponse.json(
-      { success: false, error: error instanceof Error ? error.message : String(error) },
-      { status: 500 }
-    );
+    console.error('Booking deletion failed:', error);
+    return failed('Could not delete booking', 503);
   }
 }

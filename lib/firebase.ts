@@ -7,6 +7,9 @@ import {
   collection,
   getDocs,
   setDoc,
+  updateDoc,
+  runTransaction,
+  getDocsFromServer,
   deleteDoc,
   query,
   where,
@@ -115,27 +118,26 @@ export async function saveBookingToFirestore(
 
   const path = `bookings/${bookingId}`;
 
-  // If on client, try API first for Cloud SQL + Firestore dual save
   if (typeof window !== 'undefined') {
-    try {
-      const res = await fetch('/api/bookings', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newBooking),
-      });
-      if (res.ok) {
-        const json = await res.json();
-        if (json.success) return json.booking || newBooking;
-      }
-    } catch (apiErr) {
-      console.warn('API dual save failed, falling back to direct Firestore:', apiErr);
-    }
+    const res = await fetch('/api/bookings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newBooking),
+    });
+    if (!res.ok) throw new Error(`Booking save failed (${res.status})`);
+    const result = await res.json();
+    if (!result.success) throw new Error('Booking save was not confirmed');
+    return newBooking;
   }
 
-  // Fallback or Server-side save directly to Firestore
   try {
-    await setDoc(doc(db, 'bookings', bookingId), newBooking);
-    return newBooking;
+    const ref = doc(db, 'bookings', bookingId);
+    return await runTransaction(db, async (transaction) => {
+      const existing = await transaction.get(ref);
+      if (existing.exists()) return newBooking;
+      transaction.set(ref, newBooking);
+      return newBooking;
+    });
   } catch (error) {
     handleFirestoreError(error, OperationType.CREATE, path);
   }
@@ -146,7 +148,7 @@ export async function fetchBookingsFromFirestore(): Promise<FirebaseBooking[]> {
   const path = 'bookings';
   try {
     const q = query(collection(db, 'bookings'));
-    const snapshot = await getDocs(q);
+    const snapshot = await getDocsFromServer(q);
     const bookings: FirebaseBooking[] = [];
     snapshot.forEach((d) => {
       bookings.push({ id: d.id, ...d.data() } as FirebaseBooking);
@@ -187,14 +189,10 @@ export async function updateBookingStatusInFirestore(
   const path = `bookings/${bookingId}`;
   try {
     const now = new Date().toISOString();
-    await setDoc(
-      doc(db, 'bookings', bookingId),
-      {
-        status: newStatus,
-        updatedAt: now,
-      },
-      { merge: true }
-    );
+    await updateDoc(doc(db, 'bookings', bookingId), {
+      status: newStatus,
+      updatedAt: now,
+    });
   } catch (error) {
     handleFirestoreError(error, OperationType.UPDATE, path);
   }
