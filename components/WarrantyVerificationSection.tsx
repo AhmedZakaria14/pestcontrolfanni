@@ -33,7 +33,7 @@ interface WarrantyData {
 
 const SAMPLE_WARRANTIES_AR: Omit<WarrantyData, 'id'>[] = [
   {
-    code: 'HARD-2026-9921',
+    code: 'STC-2026-9921',
     customerName: 'أحمد محمود',
     serviceType: 'مكافحة حشرات المنازل والفلل',
     propertyAddress: 'التجمع الخامس، القاهرة الجديدة',
@@ -44,7 +44,7 @@ const SAMPLE_WARRANTIES_AR: Omit<WarrantyData, 'id'>[] = [
     notes: 'تمت المعالجة الشاملة باستخدام الجل الألماني والرش الموجه بدون روائح. ضمان ساري لمدة عام كامل.',
   },
   {
-    code: 'HARD-2026-7734',
+    code: 'STC-2026-7734',
     customerName: 'د. طارق سامي',
     serviceType: 'مكافحة النمل الأبيض (الأرضة)',
     propertyAddress: 'مدينة نصر، القاهرة',
@@ -55,7 +55,7 @@ const SAMPLE_WARRANTIES_AR: Omit<WarrantyData, 'id'>[] = [
     notes: 'تم حقن الأرضيات وحلوق الأبواب بمبيدات ممتدة المفعول لحماية الهيكل والباركيه.',
   },
   {
-    code: 'HARD-2026-5512',
+    code: 'STC-2026-5512',
     customerName: 'أم محمد',
     serviceType: 'مكافحة وإبادة بق الفراش',
     propertyAddress: 'الشيخ زايد، الجيزة',
@@ -69,7 +69,7 @@ const SAMPLE_WARRANTIES_AR: Omit<WarrantyData, 'id'>[] = [
 
 const SAMPLE_WARRANTIES_EN: Omit<WarrantyData, 'id'>[] = [
   {
-    code: 'HARD-2026-9921',
+    code: 'STC-2026-9921',
     customerName: 'Ahmed Mahmoud',
     serviceType: 'Residential & Villa Pest Control',
     propertyAddress: '5th Settlement, New Cairo',
@@ -80,7 +80,7 @@ const SAMPLE_WARRANTIES_EN: Omit<WarrantyData, 'id'>[] = [
     notes: 'Comprehensive odorless German gel treatment with 1-year verified warranty coverage.',
   },
   {
-    code: 'HARD-2026-7734',
+    code: 'STC-2026-7734',
     customerName: 'Dr. Tarek Sami',
     serviceType: 'Termite Protection & Sub-slab Injection',
     propertyAddress: 'Nasr City, Cairo',
@@ -91,7 +91,7 @@ const SAMPLE_WARRANTIES_EN: Omit<WarrantyData, 'id'>[] = [
     notes: 'Targeted injection of door frames and floors to protect woodwork and structure.',
   },
   {
-    code: 'HARD-2026-5512',
+    code: 'STC-2026-5512',
     customerName: 'Om Mohamed',
     serviceType: 'Bed Bug Elimination & Thermal Treatment',
     propertyAddress: 'Sheikh Zayed, Giza',

@@ -2,7 +2,7 @@ import { company } from './company';
 
 export interface WarrantyCertificate {
   id: string;
-  code: string; // e.g. HARD-2026-8841
+  code: string; // e.g. STC-2026-8841
   customerName: string;
   customerPhone: string;
   serviceTitle: string;
@@ -25,7 +25,7 @@ export interface WarrantyCertificate {
 const initialCertificates: WarrantyCertificate[] = [
   {
     id: 'cert-1',
-    code: 'HARD-2026-8841',
+    code: 'STC-2026-8841',
     customerName: 'أ. أحمد صبري العوضي',
     customerPhone: '01012345678',
     serviceTitle: 'إبادة ومكافحة صراصير المطابخ بالجل الألماني الفائق',
@@ -45,7 +45,7 @@ const initialCertificates: WarrantyCertificate[] = [
   },
   {
     id: 'cert-2',
-    code: 'HARD-2026-9205',
+    code: 'STC-2026-9205',
     customerName: 'م. شريف عبد المنعم',
     customerPhone: '01198765432',
     serviceTitle: 'المعاملة الشاملة لإبادة بق الفراش وتبخير الأسرة والفرشات',
@@ -65,7 +65,7 @@ const initialCertificates: WarrantyCertificate[] = [
   },
   {
     id: 'cert-3',
-    code: 'HARD-2026-3112',
+    code: 'STC-2026-3112',
     customerName: 'شركة النيل للتطوير والعمران (أ. محمود طاهر)',
     customerPhone: '01000112233',
     serviceTitle: 'الحماية الهندسية وحقن خرسانة المبنى ضد النمل الأبيض قبل البناء',
@@ -85,7 +85,7 @@ const initialCertificates: WarrantyCertificate[] = [
   },
   {
     id: 'cert-4',
-    code: 'HARD-2026-1044',
+    code: 'STC-2026-1044',
     customerName: 'د. نورهان السيد',
     customerPhone: '01234567890',
     serviceTitle: 'المكافحة الدورية الشاملة للحشرات والقوارض بالحدايق',
@@ -147,7 +147,7 @@ export function createWarrantyCertificate(
   const randomNum = Math.floor(1000 + Math.random() * 9000);
   const generatedCode = payload.code
     ? payload.code.trim().toUpperCase()
-    : `HARD-2026-${randomNum}`;
+    : `STC-2026-${randomNum}`;
 
   const newCert: WarrantyCertificate = {
     id: `cert-${Date.now()}`,

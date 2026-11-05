@@ -7,24 +7,32 @@
       "properties": {
         "code": {
           "type": "string",
-          "minLength": 5,
-          "maxLength": 50,
+          "minLength": 4,
+          "maxLength": 60,
           "pattern": "^[a-zA-Z0-9_\\-]+$"
         },
         "customerName": {
           "type": "string",
           "minLength": 2,
-          "maxLength": 100
+          "maxLength": 120
+        },
+        "customerPhone": {
+          "type": "string",
+          "maxLength": 50
         },
         "serviceType": {
           "type": "string",
           "minLength": 2,
-          "maxLength": 100
+          "maxLength": 150
         },
         "propertyAddress": {
           "type": "string",
-          "minLength": 5,
-          "maxLength": 200
+          "minLength": 3,
+          "maxLength": 300
+        },
+        "city": {
+          "type": "string",
+          "maxLength": 100
         },
         "issueDate": {
           "type": "string",
@@ -33,6 +41,9 @@
         "expiryDate": {
           "type": "string",
           "maxLength": 50
+        },
+        "durationYears": {
+          "type": "number"
         },
         "status": {
           "type": "string",
@@ -44,15 +55,21 @@
         },
         "technicianName": {
           "type": "string",
-          "maxLength": 100
+          "maxLength": 120
         },
-        "notes": {
+        "pesticideDetails": {
           "type": "string",
           "maxLength": 500
         },
-        "createdAt": {
+        "notes": {
           "type": "string",
-          "format": "date-time"
+          "maxLength": 1000
+        },
+        "createdAt": {
+          "type": "string"
+        },
+        "updatedAt": {
+          "type": "string"
         }
       },
       "required": [
@@ -64,12 +81,71 @@
         "expiryDate",
         "status"
       ]
+    },
+    "BookingRequest": {
+      "title": "Booking Request",
+      "description": "Customer inspection and pest control booking request",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 120
+        },
+        "phone": {
+          "type": "string",
+          "minLength": 5,
+          "maxLength": 40
+        },
+        "service": {
+          "type": "string",
+          "maxLength": 150
+        },
+        "area": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "notes": {
+          "type": "string",
+          "maxLength": 1000
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "new",
+            "contacted",
+            "scheduled",
+            "completed",
+            "cancelled"
+          ]
+        },
+        "source": {
+          "type": "string",
+          "maxLength": 50
+        },
+        "createdAt": {
+          "type": "string"
+        },
+        "updatedAt": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "phone",
+        "service",
+        "status"
+      ]
     }
   },
   "firestore": {
     "/warranties/{warrantyId}": {
       "schema": "WarrantyCertificate",
-      "description": "Stores warranty certificates verifiable by warranty code"
+      "description": "Stores warranty certificates verifiable by warranty code and manageable by admin"
+    },
+    "/bookings/{bookingId}": {
+      "schema": "BookingRequest",
+      "description": "Stores incoming customer inspection booking requests submitted via website forms"
     }
   }
 }

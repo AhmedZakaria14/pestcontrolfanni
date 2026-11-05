@@ -170,13 +170,13 @@ export default function AboutUsPage() {
           <div className="max-w-5xl mx-auto px-4 text-center space-y-6">
             <h2 className="text-2xl sm:text-4xl font-extrabold text-white">
               {locale === 'en'
-                ? 'Ready to inspect and resolve your pest problem?'
-                : 'هل ترغب في فحص ومعالجة مشكلة الحشرات في عقارك؟'}
+                ? 'Ready to protect your property and book our services?'
+                : 'هل ترغب في حماية عقارك وحجز موعد مكافحة متخصص؟'}
             </h2>
             <p className="text-white/80 max-w-2xl mx-auto text-sm sm:text-base leading-relaxed">
               {locale === 'en'
-                ? `Contact ${company.name} today to assess the infestation and schedule an inspection anywhere in Egypt.`
-                : `تواصل مع ${company.name} الآن لمناقشة المشكلة وتحديد موعد المعاينة المناسب لموقعك في مصر.`}
+                ? `Contact ${company.name} today to schedule a treatment appointment anywhere in Egypt.`
+                : `تواصل مع ${company.name} الآن لحجز موعد المكافحة المناسب لموقعك في مصر.`}
             </p>
             <div className="pt-2 flex flex-wrap items-center justify-center gap-4">
               <button

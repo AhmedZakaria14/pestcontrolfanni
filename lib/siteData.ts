@@ -1013,11 +1013,11 @@ export const TESTIMONIALS_DATA_EN: TestimonialItem[] = [
 export const PRICING_PLANS: PricingPlan[] = [
   {
     id: 'apartment',
-    name: 'معاينة ومكافحة الشقق السكنية',
+    name: 'حجز باقة الشقق السكنية الشاملة',
     type: 'سكني',
     description: 'خطة مخصصة للشقق السكنية لحل مشاكل الصراصير، النمل، بق الفراش، أو الحشرات الزاحفة.',
     features: [
-      'معاينة فنية شاملة للمطبخ والحمامات والغرف',
+      'فحص فني شامل للمطبخ والحمامات والغرف',
       'تطبيق مبيدات معتمدة وآمنة بدون روائح نفاذة',
       'استخدام الجل النقطي الألماني والأمريكي للمطابخ',
       'تحديد التكلفة العادلة بدقة حسب المساحة ونوع الحشرة',
@@ -1059,7 +1059,7 @@ export const PRICING_PLANS: PricingPlan[] = [
 export const PRICING_PLANS_EN: PricingPlan[] = [
   {
     id: 'apartment',
-    name: 'Residential Apartment Inspection & Treatment',
+    name: 'Residential Apartment Pest Control Package',
     type: 'Residential',
     description: 'Dedicated plan for residential apartments to resolve cockroaches, ants, bed bugs, or crawling insects.',
     features: [
@@ -1119,8 +1119,8 @@ export const FAQS_DATA: FaqItem[] = [
   },
   {
     id: '3',
-    question: 'ما هي طريقة التواصل وطلب المعاينة في مصر؟',
-    answer: 'يمكنك التواصل معنا مباشرة عبر الاتصال بالأرقام: 01000989063 أو 01000989064، أو مراسلتنا فوراً عبر الواتساب على 01000989063 لتحديد موعد المعاينة المناسب لموقعك.',
+    question: 'ما هي طريقة التواصل وحجز موعد المكافحة في مصر؟',
+    answer: 'يمكنك التواصل معنا مباشرة عبر الاتصال بالأرقام: 01000989063 أو 01000989064، أو مراسلتنا فوراً عبر الواتساب على 01000989063 لحجز موعد المكافحة وتأكيده لموقعك.',
     category: 'التواصل والخدمة',
     categoryKey: 'Service',
   },

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { X, CheckCircle2, PhoneCall, ArrowLeft, ArrowRight, MessageCircle } from 'lucide-react';
 import { useLanguage } from '@/lib/i18n';
+import { saveBookingToFirestore } from '@/lib/firebase';
 
 interface BookingModalProps {
   isOpen: boolean;
@@ -33,19 +34,33 @@ export default function BookingModal({
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitted(true);
 
+    // Save directly to real Firebase Firestore
+    try {
+      await saveBookingToFirestore({
+        name: formData.name,
+        phone: formData.phone,
+        service: formData.service,
+        area: formData.area,
+        notes: formData.notes,
+        source: 'Popup Booking Modal',
+      });
+    } catch (err) {
+      console.warn('Booking saved locally/fallback if offline:', err);
+    }
+
     const message =
       locale === 'en'
-        ? `*New Pest Control Inspection Request:*
+        ? `*New Pest Control Booking Request:*
 • *Name:* ${formData.name}
 • *Phone:* ${formData.phone}
 • *Service:* ${formData.service}
 • *City / Area:* ${formData.area || 'Not specified'}
 • *Problem Details:* ${formData.notes || 'None'}`
-        : `*طلب خدمة مكافحة جديدة عبر الموقع:*
+        : `*حجز موعد مكافحة جديد عبر الموقع:*
 • *الاسم:* ${formData.name}
 • *رقم الهاتف:* ${formData.phone}
 • *نوع الخدمة:* ${formData.service}
@@ -194,9 +209,9 @@ export default function BookingModal({
                       </option>
                     ))}
                     <option
-                      value={locale === 'en' ? 'General Full Inspection' : 'معاينة وفحص عام شامل'}
+                      value={locale === 'en' ? 'Comprehensive Pest Control Booking' : 'حجز فحص ومكافحة شاملة'}
                     >
-                      {locale === 'en' ? 'General Comprehensive Inspection' : 'معاينة وفحص عام شامل'}
+                      {locale === 'en' ? 'Comprehensive Pest Control Booking' : 'حجز فحص ومكافحة شاملة'}
                     </option>
                     <option
                       value={locale === 'en' ? 'Emergency Rapid Pest Control' : 'مكافحة طارئة وفورية'}

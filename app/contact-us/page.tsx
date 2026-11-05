@@ -1,11 +1,13 @@
 'use client';
 
 import { useState } from 'react';
+
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import PageBanner from '@/components/PageBanner';
 import { Phone, MapPin, CheckCircle2, Send, ShieldCheck, MessageCircle, Clock } from 'lucide-react';
 import { useLanguage } from '@/lib/i18n';
+import { saveBookingToFirestore } from '@/lib/firebase';
 
 export default function ContactUsPage() {
   const { t, company, siteData, isRTL, locale, dir } = useLanguage();
@@ -18,18 +20,33 @@ export default function ContactUsPage() {
     message: '',
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitted(true);
+
+    // Save directly to real Firebase Firestore
+    try {
+      await saveBookingToFirestore({
+        name: formData.name,
+        phone: formData.phone,
+        area: formData.area,
+        service: formData.service,
+        notes: formData.message,
+        source: 'Contact Us Page Form',
+      });
+    } catch (err) {
+      console.warn('Booking saved locally/fallback:', err);
+    }
+
     const msg =
       locale === 'en'
-        ? `*New Inspection & Contact Request:*
+        ? `*New Pest Control Booking Request:*
 • *Name:* ${formData.name}
 • *Phone:* ${formData.phone}
 • *Area/City:* ${formData.area || 'Not specified'}
 • *Service:* ${formData.service}
 • *Details:* ${formData.message || 'No additional notes'}`
-        : `*طلب اتصال ومعاينة جديد:*
+        : `*طلب حجز موعد مكافحة جديد:*
 • *الاسم:* ${formData.name}
 • *الهاتف:* ${formData.phone}
 • *المنطقة/المحافظة:* ${formData.area || 'غير محدد'}
@@ -155,13 +172,13 @@ export default function ContactUsPage() {
                   </span>
                   <h3 className="text-2xl sm:text-3xl font-black text-[#033F2D] mt-2">
                     {locale === 'en'
-                      ? 'Send Inspection Details & We Will Contact You Promptly'
-                      : 'أرسل تفاصيل المشكلة وسنتواصل معك فوراً'}
+                      ? 'Book Your Service & We Will Contact You Promptly'
+                      : 'احجز موعد خدمتك وسنتواصل معك لتأكيد الموعد فوراً'}
                   </h3>
                   <p className="text-xs sm:text-sm text-[#484C44] mt-1">
                     {locale === 'en'
-                      ? 'Fill out the details below and our specialist will coordinate the fastest inspection.'
-                      : 'املأ البيانات أدناه ليقوم الفني المختص بالتواصل معك وتحديد الإجراء الأنسب.'}
+                      ? 'Fill out the details below and our specialist will coordinate the fastest appointment.'
+                      : 'املأ البيانات أدناه ليقوم الفني المختص بالتواصل معك وتأكيد موعد الخدمة الأنسب.'}
                   </p>
                 </div>
 
@@ -227,13 +244,13 @@ export default function ContactUsPage() {
                           <option
                             value={
                               locale === 'en'
-                                ? 'Comprehensive General Inspection'
-                                : 'معاينة وفحص عام شامل'
+                                ? 'Comprehensive Pest Control Booking'
+                                : 'حجز فحص ومكافحة شاملة'
                             }
                           >
                             {locale === 'en'
-                              ? 'Comprehensive General Inspection'
-                              : 'معاينة وفحص عام شامل'}
+                              ? 'Comprehensive Pest Control Booking'
+                              : 'حجز فحص ومكافحة شاملة'}
                           </option>
                         </select>
                       </div>

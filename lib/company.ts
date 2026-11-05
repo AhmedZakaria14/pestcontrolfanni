@@ -31,7 +31,7 @@ export const COMPANY_AR: CompanyInfo = {
   whatsapp: '01000989063',
   whatsappNumber: '201000989063',
   whatsappUrl: 'https://wa.me/201000989063',
-  workingHours: 'خدمة متواصلة يومياً لتلقي طلبات المعاينة والمكافحة',
+  workingHours: 'خدمة متواصلة يومياً لتلقي طلبات الحجز والمكافحة',
   coverage: 'تغطية شاملة للقاهرة الكبرى والجيزة ومحافظات جمهورية مصر العربية',
 };
 
@@ -50,7 +50,7 @@ export const COMPANY_EN: CompanyInfo = {
   whatsapp: '01000989063',
   whatsappNumber: '201000989063',
   whatsappUrl: 'https://wa.me/201000989063',
-  workingHours: 'Daily 24/7 service for inspection & pest control requests',
+  workingHours: 'Daily 24/7 service for booking & pest control requests',
   coverage: 'Full coverage across Greater Cairo, Giza, and all governorates of Egypt',
 };
 

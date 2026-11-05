@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Phone, CheckCircle2, MessageCircle } from 'lucide-react';
 import { useLanguage } from '@/lib/i18n';
 import ScrollReveal from '@/components/animations/ScrollReveal';
+import { saveBookingToFirestore } from '@/lib/firebase';
 
 export default function InspectionBarSection() {
   const { t, company, siteData, isRTL, locale } = useLanguage();
@@ -16,16 +17,30 @@ export default function InspectionBarSection() {
   });
   const [success, setSuccess] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSuccess(true);
+
+    // Save directly to real Firebase Firestore
+    try {
+      await saveBookingToFirestore({
+        name: formData.name,
+        phone: formData.phone,
+        service: formData.service,
+        area: formData.area,
+        source: 'Home Inspection Bar',
+      });
+    } catch (err) {
+      console.warn('Booking saved locally/fallback if offline:', err);
+    }
+
     const text =
       locale === 'en'
         ? encodeURIComponent(
-            `Inspection & Pest Control Request:\n• Name: ${formData.name}\n• Phone: ${formData.phone}\n• Area: ${formData.area || 'Not specified'}\n• Service: ${formData.service}`
+            `Pest Control Service Booking:\n• Name: ${formData.name}\n• Phone: ${formData.phone}\n• Area: ${formData.area || 'Not specified'}\n• Service: ${formData.service}`
           )
         : encodeURIComponent(
-            `طلب معاينة وخدمة مكافحة:\n• الاسم: ${formData.name}\n• الهاتف: ${formData.phone}\n• المنطقة: ${formData.area || 'غير محدد'}\n• الخدمة: ${formData.service}`
+            `حجز موعد خدمة مكافحة:\n• الاسم: ${formData.name}\n• الهاتف: ${formData.phone}\n• المنطقة: ${formData.area || 'غير محدد'}\n• الخدمة: ${formData.service}`
           );
 
     setTimeout(() => {
@@ -173,11 +188,11 @@ export default function InspectionBarSection() {
                         <option
                           value={
                             locale === 'en'
-                              ? 'Comprehensive Inspection'
-                              : 'معاينة وفحص عام شامل'
+                              ? 'Comprehensive Pest Control Booking'
+                              : 'حجز فحص ومكافحة شاملة'
                           }
                         >
-                          {locale === 'en' ? 'Comprehensive Inspection' : 'معاينة وفحص عام'}
+                          {locale === 'en' ? 'Comprehensive Pest Control Booking' : 'حجز فحص ومكافحة شاملة'}
                         </option>
                       </select>
                     </div>

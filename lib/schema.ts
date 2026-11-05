@@ -23,7 +23,7 @@ export function getLocalBusinessObject(locale: 'ar' | 'en' = 'ar') {
       currentCompany.shortName,
       altCompany.name,
       altCompany.shortName,
-      'HARD Group Pest Control Egypt',
+      'Technical Specialized Pest Control Egypt',
     ],
     description: `${COMPANY_AR.description} | ${COMPANY_EN.description}`,
     inLanguage: ['ar-EG', 'en'],

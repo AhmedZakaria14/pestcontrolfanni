@@ -101,8 +101,8 @@ export default function PricingSection({ onOpenBooking }: PricingSectionProps) {
                           }`}
                         >
                           {locale === 'en'
-                            ? 'Inspection & Custom Cost Plan'
-                            : 'معاينة وتحديد أفضل تكلفة'}
+                            ? 'Instant Booking & Best Rate'
+                            : 'حجز فوري وأفضل تكلفة'}
                         </span>
                         <span
                           className={`text-[11px] block mt-0.5 ${

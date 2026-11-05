@@ -24,7 +24,7 @@ export default function BackToTop() {
     <button
       onClick={scrollToTop}
       aria-label="الرجوع لأعلى الصفحة"
-      className="fixed bottom-7 left-7 z-[999] w-12 h-12 rounded-full bg-[#033F2D] text-[#C7F268] border-2 border-[#C7F268] shadow-xl flex items-center justify-center hover:bg-[#C7F268] hover:text-[#033F2D] hover:scale-110 active:scale-95 transition-all duration-300 cursor-pointer"
+      className="fixed bottom-6 right-6 z-[990] w-11 h-11 rounded-full bg-[#033F2D] text-[#C7F268] border-2 border-[#C7F268] shadow-xl flex items-center justify-center hover:bg-[#C7F268] hover:text-[#033F2D] hover:scale-110 active:scale-95 transition-all duration-300 cursor-pointer"
     >
       <ArrowUp className="w-5 h-5 stroke-[2.5]" />
     </button>

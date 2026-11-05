@@ -14,35 +14,60 @@ service cloud.firestore {
       return resource.data;
     }
 
-    function isSignedIn() {
-      return request.auth != null;
-    }
-
     function isValidWarranty(data) {
       return data.keys().hasAll(['code', 'customerName', 'serviceType', 'propertyAddress', 'issueDate', 'expiryDate', 'status']) &&
-        data.keys().hasOnly(['code', 'customerName', 'serviceType', 'propertyAddress', 'issueDate', 'expiryDate', 'status', 'technicianName', 'notes', 'createdAt']) &&
-        data.code is string && data.code.size() >= 5 && data.code.size() <= 50 && data.code.matches('^[a-zA-Z0-9_\\-]+$') &&
-        data.customerName is string && data.customerName.size() >= 2 && data.customerName.size() <= 100 &&
-        data.serviceType is string && data.serviceType.size() >= 2 && data.serviceType.size() <= 100 &&
-        data.propertyAddress is string && data.propertyAddress.size() >= 5 && data.propertyAddress.size() <= 200 &&
+        data.keys().hasOnly(['code', 'customerName', 'customerPhone', 'serviceType', 'propertyAddress', 'city', 'issueDate', 'expiryDate', 'durationYears', 'status', 'technicianName', 'pesticideDetails', 'notes', 'createdAt', 'updatedAt']) &&
+        data.code is string && data.code.size() >= 4 && data.code.size() <= 60 && data.code.matches('^[a-zA-Z0-9_\\-]+$') &&
+        data.customerName is string && data.customerName.size() >= 2 && data.customerName.size() <= 120 &&
+        (!('customerPhone' in data) || (data.customerPhone is string && data.customerPhone.size() <= 50)) &&
+        data.serviceType is string && data.serviceType.size() >= 2 && data.serviceType.size() <= 150 &&
+        data.propertyAddress is string && data.propertyAddress.size() >= 3 && data.propertyAddress.size() <= 300 &&
+        (!('city' in data) || (data.city is string && data.city.size() <= 100)) &&
         data.issueDate is string && data.issueDate.size() <= 50 &&
         data.expiryDate is string && data.expiryDate.size() <= 50 &&
+        (!('durationYears' in data) || data.durationYears is number) &&
         data.status is string && data.status in ['active', 'expired', 'pending'] &&
-        (!('technicianName' in data) || (data.technicianName is string && data.technicianName.size() <= 100)) &&
-        (!('notes' in data) || (data.notes is string && data.notes.size() <= 500)) &&
-        (!('createdAt' in data) || data.createdAt is string);
+        (!('technicianName' in data) || (data.technicianName is string && data.technicianName.size() <= 120)) &&
+        (!('pesticideDetails' in data) || (data.pesticideDetails is string && data.pesticideDetails.size() <= 500)) &&
+        (!('notes' in data) || (data.notes is string && data.notes.size() <= 1000)) &&
+        (!('createdAt' in data) || data.createdAt is string) &&
+        (!('updatedAt' in data) || data.updatedAt is string);
+    }
+
+    function isValidBooking(data) {
+      return data.keys().hasAll(['name', 'phone', 'service', 'status']) &&
+        data.keys().hasOnly(['name', 'phone', 'service', 'area', 'notes', 'status', 'source', 'createdAt', 'updatedAt']) &&
+        data.name is string && data.name.size() >= 2 && data.name.size() <= 120 &&
+        data.phone is string && data.phone.size() >= 5 && data.phone.size() <= 40 &&
+        data.service is string && data.service.size() <= 150 &&
+        (!('area' in data) || (data.area is string && data.area.size() <= 200)) &&
+        (!('notes' in data) || (data.notes is string && data.notes.size() <= 1000)) &&
+        data.status is string && data.status in ['new', 'contacted', 'scheduled', 'completed', 'cancelled'] &&
+        (!('source' in data) || (data.source is string && data.source.size() <= 50)) &&
+        (!('createdAt' in data) || data.createdAt is string) &&
+        (!('updatedAt' in data) || data.updatedAt is string);
     }
 
     match /{document=**} {
       allow read, write: if false;
     }
 
+    // Electronic Warranty Certificates
     match /warranties/{warrantyId} {
       allow get: if isValidId(warrantyId);
       allow list: if true;
       allow create: if isValidId(warrantyId) && isValidWarranty(incoming());
       allow update: if isValidId(warrantyId) && isValidWarranty(incoming()) && incoming().code == existing().code;
       allow delete: if isValidId(warrantyId);
+    }
+
+    // Booking Requests from customer forms
+    match /bookings/{bookingId} {
+      allow get: if isValidId(bookingId);
+      allow list: if true;
+      allow create: if isValidId(bookingId) && isValidBooking(incoming());
+      allow update: if isValidId(bookingId) && isValidBooking(incoming());
+      allow delete: if isValidId(bookingId);
     }
   }
 }

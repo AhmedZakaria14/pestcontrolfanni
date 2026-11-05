@@ -78,8 +78,8 @@ export default function PestIdentifierTeaser() {
                 <CheckCircle2 className="w-4 h-4 text-[#C7F268] shrink-0" />
                 <span>
                   {locale === 'en'
-                    ? 'Direct booking for field inspection'
-                    : 'حجز مباشر للمعاينة الميدانية'}
+                    ? 'Direct booking for pest control service'
+                    : 'حجز مباشر لموعد المكافحة والخدمة'}
                 </span>
               </div>
             </div>

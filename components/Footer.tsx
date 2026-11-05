@@ -1,19 +1,34 @@
 'use client';
 
 import { useState } from 'react';
+
 import Link from 'next/link';
 import { Phone, ArrowLeft, ArrowRight, CheckCircle2, MessageCircle, MapPin } from 'lucide-react';
 import Logo from '@/components/Logo';
 import { useLanguage } from '@/lib/i18n';
+import { saveBookingToFirestore } from '@/lib/firebase';
 
 export default function Footer() {
   const [inquiryPhone, setInquiryPhone] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const { t, company, siteData, isRTL, locale } = useLanguage();
 
-  const handleInquiry = (e: React.FormEvent) => {
+  const handleInquiry = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!inquiryPhone) return;
+
+    // Save directly to real Firebase Firestore
+    try {
+      await saveBookingToFirestore({
+        name: 'حجز واستفسار سريع (الفوتر)',
+        phone: inquiryPhone,
+        service: 'حجز خدمة مكافحة سريع',
+        source: 'Footer Quick Callback',
+      });
+    } catch (err) {
+      console.warn('Inquiry saved locally/fallback:', err);
+    }
+
     const msg =
       locale === 'en'
         ? encodeURIComponent(
@@ -271,6 +286,12 @@ export default function Footer() {
             </Link>
             <Link href="/faqs" className="hover:text-[#C7F268] transition-colors">
               {t.navFaqs}
+            </Link>
+            <Link
+              href="/admin"
+              className="text-[#C7F268]/80 hover:text-[#C7F268] font-bold transition-colors"
+            >
+              {locale === 'en' ? 'Admin Panel' : 'لوحة الإدارة'}
             </Link>
           </div>
         </div>

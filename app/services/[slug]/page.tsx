@@ -165,8 +165,8 @@ export default function ServiceDetailPage({
                   </span>
                   <h3 className="text-2xl sm:text-3xl font-black">
                     {locale === 'en'
-                      ? `Book an inspection for ${service.title} today`
-                      : `احجز موعد معاينة لخدمة ${service.title} اليوم`}
+                      ? `Book ${service.title} service today`
+                      : `احجز خدمة ${service.title} لعقارك اليوم`}
                   </h3>
                   <p className="text-sm text-white/80 max-w-xl leading-relaxed">
                     {t.emergencyDesc}

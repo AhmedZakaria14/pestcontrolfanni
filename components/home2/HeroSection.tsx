@@ -26,16 +26,6 @@ interface HeroSectionProps {
 
 const HERO_IMAGES_AR = [
   {
-    src: COMPANY_IMAGES.mainHeroBg,
-    title: 'الواجهة الرسمية المعتمدة للمركز الفني المتخصص',
-    type: 'المركز الفني المتخصص لمكافحة الحشرات والقوارض',
-  },
-  {
-    src: COMPANY_IMAGES.heroShowcaseImage,
-    title: 'خدمات إبادة وتحصين معتمدة ضد الآفات',
-    type: 'حلول فنية موثقة',
-  },
-  {
     src: COMPANY_IMAGES.fieldWorkerBackpack,
     title: 'الفريق الفني بجهة التطبيق الميداني',
     type: 'صورة رسمية موثقة',
@@ -58,16 +48,6 @@ const HERO_IMAGES_AR = [
 ];
 
 const HERO_IMAGES_EN = [
-  {
-    src: COMPANY_IMAGES.mainHeroBg,
-    title: 'Specialized Technical Center Official Interface',
-    type: 'Technical Specialized Pest & Rodent Control',
-  },
-  {
-    src: COMPANY_IMAGES.heroShowcaseImage,
-    title: 'Certified Pest Eradication & Prevention',
-    type: 'Official Technical Solutions',
-  },
   {
     src: COMPANY_IMAGES.fieldWorkerBackpack,
     title: 'Certified Field Application Team',

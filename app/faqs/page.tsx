@@ -168,8 +168,8 @@ export default function FaqsPage() {
                 </h4>
                 <p className="text-xs text-white/80">
                   {locale === 'en'
-                    ? 'Call our technical team or book a diagnostic visit today.'
-                    : 'اتصل بفريق خدمة العملاء أو احجز موعد معاينة ميدانية لعقارك اليوم.'}
+                    ? 'Call our technical team or book a pest control service today.'
+                    : 'اتصل بفريق خدمة العملاء أو احجز موعد خدمة مكافحة لعقارك اليوم.'}
                 </p>
               </div>
 
