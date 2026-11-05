@@ -3,13 +3,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sqlDb } from '@/src/db';
 import { bookings } from '@/src/db/schema';
 import { eq } from 'drizzle-orm';
-import {
-  saveBookingToFirestore,
-  fetchBookingsFromFirestore,
-  updateBookingStatusInFirestore,
-  deleteBookingFromFirestore,
-  type FirebaseBooking,
-} from '@/lib/firebase';
+import { getBookingCollection, isBookingAdmin } from '@/lib/firebase-admin';
+import type { FirebaseBooking } from '@/lib/firebase';
 
 const statuses = new Set(['new', 'contacted', 'scheduled', 'completed', 'cancelled']);
 const sqlConfigured = () => Boolean(process.env.SQL_HOST && process.env.SQL_USER);
@@ -20,9 +15,22 @@ function failed(error: string, status: number) {
   return NextResponse.json({ success: false, error }, { status });
 }
 
-export async function GET() {
+async function fetchFirestoreBookings() {
+  const snapshot = await getBookingCollection().get();
+  return snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id } as FirebaseBooking));
+}
+
+export async function HEAD(req: NextRequest) {
+  return new NextResponse(null, {
+    status: await isBookingAdmin(req) ? 204 : 403,
+    headers: { 'Cache-Control': 'private, no-store' },
+  });
+}
+
+export async function GET(req: NextRequest) {
+  if (!(await isBookingAdmin(req))) return failed('Admin authentication required', 403);
   const [firestore, sql] = await Promise.allSettled([
-    fetchBookingsFromFirestore(),
+    fetchFirestoreBookings(),
     sqlConfigured() ? sqlDb.select().from(bookings) : Promise.resolve([]),
   ]);
 
@@ -65,16 +73,28 @@ export async function POST(req: NextRequest) {
   if (!phone || !validId(id)) return failed('Invalid phone or booking ID', 400);
 
   try {
-    const booking = await saveBookingToFirestore({
+    const now = new Date().toISOString();
+    const booking: FirebaseBooking = {
       id,
       name: clean(body.name) || 'عميل بدون اسم',
       phone,
-      service: clean(body.service),
+      service: clean(body.service) || 'حجز فحص ومكافحة شاملة',
       area: clean(body.area),
       notes: clean(body.notes),
-      source: clean(body.source),
-    });
-    return NextResponse.json({ success: true, id: booking.id });
+      source: clean(body.source) || 'Website Booking Form',
+      status: 'new',
+      createdAt: now,
+      updatedAt: now,
+    };
+    const ref = getBookingCollection().doc(id);
+    try {
+      await ref.create(booking);
+    } catch (error) {
+      if ((error as { code?: number }).code !== 6) throw error;
+      const previous = (await ref.get()).data();
+      if (!previous || previous.phone !== phone) return failed('Booking ID already exists', 409);
+    }
+    return NextResponse.json({ success: true, id });
   } catch (error) {
     console.error('Booking write failed:', error);
     return failed('Could not save booking', 503);
@@ -82,6 +102,7 @@ export async function POST(req: NextRequest) {
 }
 
 export async function PATCH(req: NextRequest) {
+  if (!(await isBookingAdmin(req))) return failed('Admin authentication required', 403);
   const body = await req.json().catch(() => null);
   const id = clean(body?.id);
   const status = clean(body?.status);
@@ -94,7 +115,7 @@ export async function PATCH(req: NextRequest) {
         .set({ status, updatedAt: new Date() }).where(eq(bookings.id, id)).returning({ id: bookings.id });
       if (!updated) return failed('Booking not found', 404);
     } else {
-      await updateBookingStatusInFirestore(id, status as FirebaseBooking['status']);
+      await getBookingCollection().doc(id).update({ status, updatedAt: new Date().toISOString() });
     }
     return NextResponse.json({ success: true, id, status });
   } catch (error) {
@@ -104,6 +125,7 @@ export async function PATCH(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
+  if (!(await isBookingAdmin(req))) return failed('Admin authentication required', 403);
   const { searchParams } = new URL(req.url);
   const id = searchParams.get('id') ?? '';
   if (!validId(id)) return failed('Invalid booking ID', 400);
@@ -113,7 +135,7 @@ export async function DELETE(req: NextRequest) {
       if (!sqlConfigured()) return failed('Legacy booking storage is unavailable', 503);
       await sqlDb.delete(bookings).where(eq(bookings.id, id));
     } else {
-      await deleteBookingFromFirestore(id);
+      await getBookingCollection().doc(id).delete();
     }
     return NextResponse.json({ success: true, deletedId: id });
   } catch (error) {

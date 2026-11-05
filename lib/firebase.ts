@@ -7,9 +7,6 @@ import {
   collection,
   getDocs,
   setDoc,
-  updateDoc,
-  runTransaction,
-  getDocsFromServer,
   deleteDoc,
   query,
   where,
@@ -116,95 +113,15 @@ export async function saveBookingToFirestore(
     updatedAt: now,
   };
 
-  const path = `bookings/${bookingId}`;
-
-  if (typeof window !== 'undefined') {
-    const res = await fetch('/api/bookings', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(newBooking),
-    });
-    if (!res.ok) throw new Error(`Booking save failed (${res.status})`);
-    const result = await res.json();
-    if (!result.success) throw new Error('Booking save was not confirmed');
-    return newBooking;
-  }
-
-  try {
-    const ref = doc(db, 'bookings', bookingId);
-    return await runTransaction(db, async (transaction) => {
-      const existing = await transaction.get(ref);
-      if (existing.exists()) return newBooking;
-      transaction.set(ref, newBooking);
-      return newBooking;
-    });
-  } catch (error) {
-    handleFirestoreError(error, OperationType.CREATE, path);
-  }
-}
-
-
-export async function fetchBookingsFromFirestore(): Promise<FirebaseBooking[]> {
-  const path = 'bookings';
-  try {
-    const q = query(collection(db, 'bookings'));
-    const snapshot = await getDocsFromServer(q);
-    const bookings: FirebaseBooking[] = [];
-    snapshot.forEach((d) => {
-      bookings.push({ id: d.id, ...d.data() } as FirebaseBooking);
-    });
-    // Sort descending by createdAt
-    return bookings.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
-  } catch (error) {
-    handleFirestoreError(error, OperationType.LIST, path);
-  }
-}
-
-export function subscribeToBookings(
-  onData: (bookings: FirebaseBooking[]) => void,
-  onError?: (err: unknown) => void
-) {
-  const q = query(collection(db, 'bookings'));
-  return onSnapshot(
-    q,
-    (snapshot) => {
-      const bookings: FirebaseBooking[] = [];
-      snapshot.forEach((d) => {
-        bookings.push({ id: d.id, ...d.data() } as FirebaseBooking);
-      });
-      bookings.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
-      onData(bookings);
-    },
-    (error) => {
-      if (onError) onError(error);
-      else console.error('Error listening to bookings:', error);
-    }
-  );
-}
-
-export async function updateBookingStatusInFirestore(
-  bookingId: string,
-  newStatus: FirebaseBooking['status']
-): Promise<void> {
-  const path = `bookings/${bookingId}`;
-  try {
-    const now = new Date().toISOString();
-    await updateDoc(doc(db, 'bookings', bookingId), {
-      status: newStatus,
-      updatedAt: now,
-    });
-  } catch (error) {
-    handleFirestoreError(error, OperationType.UPDATE, path);
-  }
-}
-
-export async function deleteBookingFromFirestore(bookingId: string): Promise<void> {
-  const path = `bookings/${bookingId}`;
-  try {
-    await deleteDoc(doc(db, 'bookings', bookingId));
-  } catch (error) {
-    handleFirestoreError(error, OperationType.DELETE, path);
-  }
+  const res = await fetch('/api/bookings', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(newBooking),
+  });
+  if (!res.ok) throw new Error(`Booking save failed (${res.status})`);
+  const result = await res.json();
+  if (!result.success || result.id !== bookingId) throw new Error('Booking save was not confirmed');
+  return newBooking;
 }
 
 // Warranties CRUD

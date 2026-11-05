@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
+import { onAuthStateChanged, signInWithEmailAndPassword, signOut } from 'firebase/auth';
 import {
   ShieldCheck,
   CalendarCheck,
@@ -30,6 +31,7 @@ import {
 import Logo from '@/components/Logo';
 import { useLanguage } from '@/lib/i18n';
 import {
+  auth,
   FirebaseBooking,
   FirebaseWarranty,
   fetchWarrantiesFromFirestore,
@@ -40,16 +42,20 @@ import {
 
 type AdminBooking = FirebaseBooking & { storage: 'firestore' | 'cloudsql' };
 
+async function bookingAdminFetch(url: string, init: RequestInit) {
+  const user = auth.currentUser;
+  if (!user) throw new Error('Admin session required');
+  const headers = new Headers(init.headers);
+  headers.set('Authorization', `Bearer ${await user.getIdToken()}`);
+  return fetch(url, { ...init, headers });
+}
+
 export default function AdminDashboardPage() {
   const { locale, isRTL } = useLanguage();
 
-  // Authentication State with lazy initializer
-  const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return sessionStorage.getItem('admin_session_auth') === 'true';
-    }
-    return false;
-  });
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [emailInput, setEmailInput] = useState('');
+  const [signingIn, setSigningIn] = useState(false);
   const [passwordInput, setPasswordInput] = useState('');
   const [loginError, setLoginError] = useState('');
 
@@ -100,11 +106,46 @@ export default function AdminDashboardPage() {
     setTimeout(() => setNotification(null), 3500);
   };
 
+  useEffect(() => {
+    let active = true;
+    let revision = 0;
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      const request = ++revision;
+      if (!user) {
+        if (active) setIsAuthenticated(false);
+        return;
+      }
+      try {
+        const res = await fetch('/api/bookings', {
+          method: 'HEAD',
+          headers: { Authorization: `Bearer ${await user.getIdToken()}` },
+        });
+        if (!active || request !== revision) return;
+        setIsAuthenticated(res.ok);
+        if (!res.ok) {
+          setLoginError(locale === 'en' ? 'Admin access is unavailable for this account.' : 'حسابك لا يملك صلاحية الإدارة أو إعدادات الدخول غير مكتملة.');
+        } else {
+          setPasswordInput('');
+          setLoginError('');
+        }
+      } catch {
+        if (active && request === revision) {
+          setIsAuthenticated(false);
+          setLoginError(locale === 'en' ? 'Could not verify admin access.' : 'تعذّر التحقق من صلاحية الدخول.');
+        }
+      }
+    });
+    return () => {
+      active = false;
+      unsubscribe();
+    };
+  }, [locale]);
+
   const loadBookings = useCallback(async (showLoading = true) => {
     const request = ++bookingsRequest.current;
     if (showLoading) setLoadingBookings(true);
     try {
-      const res = await fetch('/api/bookings', { cache: 'no-store' });
+      const res = await bookingAdminFetch('/api/bookings', { cache: 'no-store' });
       if (!res.ok) throw new Error(`Booking list request failed (${res.status})`);
       const result = await res.json();
       if (request !== bookingsRequest.current) return;
@@ -181,30 +222,32 @@ export default function AdminDashboardPage() {
     };
   }, [isAuthenticated, loadAllData, loadBookings]);
 
-  // Handle Login
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Default master passkey or environment key
-    if (passwordInput === 'admin2026' || passwordInput === 'azeco44@gmail.com') {
-      setIsAuthenticated(true);
-      sessionStorage.setItem('admin_session_auth', 'true');
-      setLoginError('');
-      showToast(locale === 'en' ? 'Welcome to Admin Control Panel' : 'مرحباً بك في لوحة تحكم الإدارة');
-    } else {
-      setLoginError(locale === 'en' ? 'Invalid password. Try again.' : 'كلمة المرور غير صحيحة. يرجى المحاولة ثانية.');
+    setLoginError('');
+    setSigningIn(true);
+    try {
+      // Signing out first also lets a rejected account retry with different credentials.
+      if (auth.currentUser) await signOut(auth);
+      await signInWithEmailAndPassword(auth, emailInput.trim(), passwordInput);
+    } catch {
+      setLoginError(locale === 'en' ? 'Could not sign in. Check your credentials.' : 'تعذّر تسجيل الدخول. راجع البريد الإلكتروني وكلمة المرور.');
+    } finally {
+      setSigningIn(false);
     }
   };
 
-  const handleLogout = () => {
-    setIsAuthenticated(false);
-    sessionStorage.removeItem('admin_session_auth');
+  const handleLogout = async () => {
+    await signOut(auth);
+    setBookings([]);
+    setSelectedBooking(null);
     setPasswordInput('');
   };
 
   // Update Booking Status
   const handleStatusChange = async (bookingId: string, newStatus: FirebaseBooking['status']) => {
     try {
-      const res = await fetch('/api/bookings', {
+      const res = await bookingAdminFetch('/api/bookings', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -235,7 +278,7 @@ export default function AdminDashboardPage() {
       const params = new URLSearchParams({ id: bookingId });
       const storage = bookings.find((booking) => booking.id === bookingId)?.storage;
       if (storage) params.set('storage', storage);
-      const res = await fetch(`/api/bookings?${params}`, { method: 'DELETE' });
+      const res = await bookingAdminFetch(`/api/bookings?${params}`, { method: 'DELETE' });
       if (!res.ok) throw new Error(`Booking deletion failed (${res.status})`);
       void loadBookings(false);
       setBookings((prev) => prev.filter((b) => b.id !== bookingId));
@@ -391,14 +434,26 @@ export default function AdminDashboardPage() {
           </div>
 
           <form onSubmit={handleLogin} className="space-y-4">
+            <label className="block text-xs font-bold text-[#C7F268]">
+              البريد الإلكتروني للأدمن
+              <input
+                type="email"
+                required
+                autoComplete="username"
+                value={emailInput}
+                onChange={(e) => setEmailInput(e.target.value)}
+                className="mt-1.5 w-full rounded-xl border border-white/20 bg-white/10 px-4 py-3 text-sm text-white"
+                dir="ltr"
+              />
+            </label>
             <div>
               <label className="block text-xs font-bold text-[#C7F268] mb-1.5">
-                كلمة المرور الإدارية / رمز الدخول
+                كلمة مرور حساب الأدمن
               </label>
               <input
                 type="password"
                 required
-                autoFocus
+                autoComplete="current-password"
                 placeholder="أدخل كلمة مرور لوحة التحكم..."
                 value={passwordInput}
                 onChange={(e) => setPasswordInput(e.target.value)}
@@ -416,6 +471,7 @@ export default function AdminDashboardPage() {
 
             <button
               type="submit"
+              disabled={signingIn}
               className="w-full bg-[#C7F268] hover:bg-[#b5e050] text-[#033F2D] font-black py-3 px-6 rounded-xl text-sm transition-all shadow-lg hover:scale-[1.02] cursor-pointer"
             >
               تسجيل الدخول إلى النظام
