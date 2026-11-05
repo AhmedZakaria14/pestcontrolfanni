@@ -51,30 +51,32 @@ export default function BookingModal({
 
   return (
     <div
-      className={`fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 ${
+      className={`pest-modal-overlay bg-black/70 ${
         isRTL ? 'text-right' : 'text-left'
       }`}
       dir={isRTL ? 'rtl' : 'ltr'}
     >
       <div
-        className="relative w-full max-w-xl bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden animate-in fade-in zoom-in-95 duration-200"
-        onClick={(e) => e.stopPropagation()}
+        className="pest-modal-panel relative w-full max-w-xl bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden animate-in fade-in zoom-in-95 duration-200"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="booking-modal-title"
       >
         {/* Modal Header */}
-        <div className="bg-[#033F2D] text-white p-6 relative">
+        <div className="bg-[#033F2D] text-white p-4 pe-16 sm:p-6 sm:pe-20 relative shrink-0">
           <button
             onClick={onClose}
-            className={`absolute top-5 ${
-              isRTL ? 'left-5' : 'right-5'
-            } text-white/80 hover:text-white p-1 rounded-full hover:bg-white/10 transition-colors cursor-pointer`}
-            aria-label="Close"
+            className={`absolute top-2 sm:top-4 ${
+              isRTL ? 'left-2 sm:left-4' : 'right-2 sm:right-4'
+            } text-white/80 hover:text-white grid size-11 place-items-center rounded-full hover:bg-white/10 transition-colors cursor-pointer`}
+            aria-label={isRTL ? 'إغلاق' : 'Close'}
           >
             <X className="w-6 h-6" />
           </button>
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#C7F268]/20 text-[#C7F268] text-xs font-bold rounded-full tracking-wider mb-2">
             {t.bookingBadge}
           </div>
-          <h3 className="text-xl sm:text-2xl font-bold text-white">{company.name}</h3>
+          <h3 id="booking-modal-title" className="text-lg sm:text-2xl font-bold text-white">{company.name}</h3>
           <p className="text-white/80 text-xs sm:text-sm mt-1">
             {t.bookingSubtitlePrompt}:{' '}
             <a
@@ -97,7 +99,7 @@ export default function BookingModal({
         </div>
 
         {/* Modal Body */}
-        <div className="p-6">
+        <div className="pest-modal-body p-4 sm:p-6">
           {submitted ? (
             <div className="text-center py-8 space-y-4">
               <div className="w-16 h-16 bg-[#C7F268]/30 text-[#033F2D] rounded-full flex items-center justify-center mx-auto">
@@ -134,7 +136,7 @@ export default function BookingModal({
                     placeholder={t.bookingNamePlaceholder}
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className={`w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:border-[#033F2D] focus:ring-1 focus:ring-[#033F2D] outline-none text-sm ${
+                    className={`w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:border-[#033F2D] focus:ring-1 focus:ring-[#033F2D] outline-none text-base sm:text-sm ${
                       isRTL ? 'text-right' : 'text-left'
                     }`}
                   />
@@ -149,7 +151,7 @@ export default function BookingModal({
                     placeholder={t.bookingPhonePlaceholder}
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:border-[#033F2D] focus:ring-1 focus:ring-[#033F2D] outline-none text-sm text-left"
+                    className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:border-[#033F2D] focus:ring-1 focus:ring-[#033F2D] outline-none text-base sm:text-sm text-left"
                     dir="ltr"
                   />
                 </div>
@@ -163,7 +165,7 @@ export default function BookingModal({
                   <select
                     value={formData.service}
                     onChange={(e) => setFormData({ ...formData, service: e.target.value })}
-                    className={`w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:border-[#033F2D] focus:ring-1 focus:ring-[#033F2D] outline-none text-sm bg-white ${
+                    className={`w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:border-[#033F2D] focus:ring-1 focus:ring-[#033F2D] outline-none text-base sm:text-sm bg-white ${
                       isRTL ? 'text-right' : 'text-left'
                     }`}
                   >
@@ -193,7 +195,7 @@ export default function BookingModal({
                     placeholder={t.bookingAreaPlaceholder}
                     value={formData.area}
                     onChange={(e) => setFormData({ ...formData, area: e.target.value })}
-                    className={`w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:border-[#033F2D] focus:ring-1 focus:ring-[#033F2D] outline-none text-sm ${
+                    className={`w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:border-[#033F2D] focus:ring-1 focus:ring-[#033F2D] outline-none text-base sm:text-sm ${
                       isRTL ? 'text-right' : 'text-left'
                     }`}
                   />
@@ -209,7 +211,7 @@ export default function BookingModal({
                   placeholder={t.bookingNotesPlaceholder}
                   value={formData.notes}
                   onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                  className={`w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:border-[#033F2D] focus:ring-1 focus:ring-[#033F2D] outline-none text-sm resize-none ${
+                  className={`w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:border-[#033F2D] focus:ring-1 focus:ring-[#033F2D] outline-none text-base sm:text-sm resize-none ${
                     isRTL ? 'text-right' : 'text-left'
                   }`}
                 />
@@ -223,7 +225,7 @@ export default function BookingModal({
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="bg-[#C7F268] hover:bg-[#b5e050] text-[#033F2D] font-bold py-2.5 px-6 rounded-xl text-sm w-full sm:w-auto order-1 sm:order-2 flex items-center justify-center gap-2 cursor-pointer transition-all shadow-md"
+                  className="bg-[#C7F268] hover:bg-[#b5e050] text-[#033F2D] font-bold min-h-11 py-2.5 px-6 rounded-xl text-sm w-full sm:w-auto order-1 sm:order-2 flex items-center justify-center gap-2 cursor-pointer transition-all shadow-md"
                 >
                   <span>{t.bookingSubmitBtn}</span>
                   {isRTL ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
