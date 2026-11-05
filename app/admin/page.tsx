@@ -100,7 +100,7 @@ export default function AdminDashboardPage() {
     setTimeout(() => setNotification(null), 3500);
   };
 
-  const loadBookings = async () => {
+  const loadBookings = useCallback(async () => {
     setLoadingBookings(true);
     let loaded = false;
     try {
@@ -124,9 +124,9 @@ export default function AdminDashboardPage() {
       }
     }
     setLoadingBookings(false);
-  };
+  }, []);
 
-  const loadWarranties = async () => {
+  const loadWarranties = useCallback(async () => {
     setLoadingWarranties(true);
     let loaded = false;
     try {
@@ -150,17 +150,21 @@ export default function AdminDashboardPage() {
       }
     }
     setLoadingWarranties(false);
-  };
+  }, []);
 
-  const loadAllData = async () => {
+  const loadAllData = useCallback(async () => {
     await Promise.all([loadBookings(), loadWarranties()]);
-  };
+  }, [loadBookings, loadWarranties]);
 
   // Real-time Firestore subscriptions when authenticated
   useEffect(() => {
     if (!isAuthenticated) return;
 
-    loadAllData();
+    // Loading data in an async context avoids synchronous setState warning
+    const init = async () => {
+      await loadAllData();
+    };
+    init();
 
     const unsubscribeBookings = subscribeToBookings(
       (bData) => {
@@ -188,7 +192,7 @@ export default function AdminDashboardPage() {
       unsubscribeBookings();
       unsubscribeWarranties();
     };
-  }, [isAuthenticated]);
+  }, [isAuthenticated, loadAllData]);
 
   // Handle Login
   const handleLogin = (e: React.FormEvent) => {
