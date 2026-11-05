@@ -24,7 +24,7 @@ export default function ContactUsPage() {
     e.preventDefault();
     setSubmitted(true);
 
-    // Save directly to real Firebase Firestore
+    // Save directly to real Firebase Firestore & Cloud SQL
     try {
       await saveBookingToFirestore({
         name: formData.name,
@@ -37,25 +37,6 @@ export default function ContactUsPage() {
     } catch (err) {
       console.warn('Booking saved locally/fallback:', err);
     }
-
-    const msg =
-      locale === 'en'
-        ? `*New Pest Control Booking Request:*
-• *Name:* ${formData.name}
-• *Phone:* ${formData.phone}
-• *Area/City:* ${formData.area || 'Not specified'}
-• *Service:* ${formData.service}
-• *Details:* ${formData.message || 'No additional notes'}`
-        : `*طلب حجز موعد مكافحة جديد:*
-• *الاسم:* ${formData.name}
-• *الهاتف:* ${formData.phone}
-• *المنطقة/المحافظة:* ${formData.area || 'غير محدد'}
-• *نوع الخدمة:* ${formData.service}
-• *تفاصيل المشكلة:* ${formData.message || 'لا توجد ملاحظات إضافية'}`;
-
-    setTimeout(() => {
-      window.open(`${company.whatsappUrl}?text=${encodeURIComponent(msg)}`, '_blank');
-    }, 600);
   };
 
   return (

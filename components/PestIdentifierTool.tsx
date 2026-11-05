@@ -47,6 +47,7 @@ import {
 } from '@/lib/pestData';
 import BookingModal from './BookingModal';
 import { useLanguage } from '@/lib/i18n';
+import { saveBookingToFirestore } from '@/lib/firebase';
 
 const iconMap: Record<string, any> = {
   UtensilsCrossed,
@@ -135,17 +136,21 @@ export default function PestIdentifierTool() {
     }
   };
 
-  const handleUploadSubmit = (e: React.FormEvent) => {
+  const handleUploadSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setUploadSubmitted(true);
-    // Open WhatsApp with direct pre-filled prompt
-    const msg =
-      locale === 'en'
-        ? `Hello, I am ${userName} (Phone: ${userPhone}). I have attached a pest photo for immediate identification.`
-        : `مرحباً، أنا ${userName} (رقم الهاتف: ${userPhone}). أرسل لكم صورة حشرة لفحصها وتشخيصها مجاناً.`;
-    setTimeout(() => {
-      window.open(`${company.whatsappUrl}?text=${encodeURIComponent(msg)}`, '_blank');
-    }, 1000);
+    
+    try {
+      await saveBookingToFirestore({
+        name: userName || 'عميل - صورة حشرة',
+        phone: userPhone,
+        service: 'تشخيص حشرة من صورة مرفقة',
+        notes: 'طلب تشخيص مجاني عبر رفع صورة الحشرة',
+        source: 'Photo Upload Identification Tool',
+      });
+    } catch (err) {
+      console.warn('Photo booking save fallback:', err);
+    }
   };
 
   // Filtered encyclopedia pests

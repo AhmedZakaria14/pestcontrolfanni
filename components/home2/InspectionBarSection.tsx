@@ -21,7 +21,7 @@ export default function InspectionBarSection() {
     e.preventDefault();
     setSuccess(true);
 
-    // Save directly to real Firebase Firestore
+    // Save directly to real Firebase Firestore & Cloud SQL
     try {
       await saveBookingToFirestore({
         name: formData.name,
@@ -33,26 +33,6 @@ export default function InspectionBarSection() {
     } catch (err) {
       console.warn('Booking saved locally/fallback if offline:', err);
     }
-
-    const text =
-      locale === 'en'
-        ? encodeURIComponent(
-            `Pest Control Service Booking:\n• Name: ${formData.name}\n• Phone: ${formData.phone}\n• Area: ${formData.area || 'Not specified'}\n• Service: ${formData.service}`
-          )
-        : encodeURIComponent(
-            `حجز موعد خدمة مكافحة:\n• الاسم: ${formData.name}\n• الهاتف: ${formData.phone}\n• المنطقة: ${formData.area || 'غير محدد'}\n• الخدمة: ${formData.service}`
-          );
-
-    setTimeout(() => {
-      window.open(`${company.whatsappUrl}?text=${text}`, '_blank');
-      setSuccess(false);
-      setFormData({
-        name: '',
-        phone: '',
-        area: '',
-        service: siteData.services[0]?.title || '',
-      });
-    }, 1200);
   };
 
   return (

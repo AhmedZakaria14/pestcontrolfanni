@@ -17,7 +17,7 @@ export default function Footer() {
     e.preventDefault();
     if (!inquiryPhone) return;
 
-    // Save directly to real Firebase Firestore
+    // Save directly to real Firebase Firestore & Cloud SQL
     try {
       await saveBookingToFirestore({
         name: 'حجز واستفسار سريع (الفوتر)',
@@ -29,15 +29,6 @@ export default function Footer() {
       console.warn('Inquiry saved locally/fallback:', err);
     }
 
-    const msg =
-      locale === 'en'
-        ? encodeURIComponent(
-            `Hello, I would like to inquire about pest control services. My contact phone number is: ${inquiryPhone}`
-          )
-        : encodeURIComponent(
-            `مرحباً، أود الاستفسار عن خدمة مكافحة الحشرات. رقم هاتفي للمتابعة: ${inquiryPhone}`
-          );
-    window.open(`${company.whatsappUrl}?text=${msg}`, '_blank');
     setSubmitted(true);
     setTimeout(() => {
       setInquiryPhone('');

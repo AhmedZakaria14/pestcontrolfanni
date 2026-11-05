@@ -102,26 +102,54 @@ export default function AdminDashboardPage() {
 
   const loadBookings = async () => {
     setLoadingBookings(true);
+    let loaded = false;
     try {
-      const data = await fetchBookingsFromFirestore();
-      setBookings(data || []);
-    } catch (err) {
-      console.error('Failed to load bookings:', err);
-    } finally {
-      setLoadingBookings(false);
+      const res = await fetch('/api/bookings');
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+          setBookings(json.data);
+          loaded = true;
+        }
+      }
+    } catch (apiErr) {
+      console.warn('API load bookings fallback:', apiErr);
     }
+    if (!loaded) {
+      try {
+        const data = await fetchBookingsFromFirestore();
+        setBookings(data || []);
+      } catch (err) {
+        console.error('Failed to load bookings:', err);
+      }
+    }
+    setLoadingBookings(false);
   };
 
   const loadWarranties = async () => {
     setLoadingWarranties(true);
+    let loaded = false;
     try {
-      const data = await fetchWarrantiesFromFirestore();
-      setWarranties(data || []);
-    } catch (err) {
-      console.error('Failed to load warranties:', err);
-    } finally {
-      setLoadingWarranties(false);
+      const res = await fetch('/api/warranties');
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+          setWarranties(json.data);
+          loaded = true;
+        }
+      }
+    } catch (apiErr) {
+      console.warn('API load warranties fallback:', apiErr);
     }
+    if (!loaded) {
+      try {
+        const data = await fetchWarrantiesFromFirestore();
+        setWarranties(data || []);
+      } catch (err) {
+        console.error('Failed to load warranties:', err);
+      }
+    }
+    setLoadingWarranties(false);
   };
 
   const loadAllData = async () => {
